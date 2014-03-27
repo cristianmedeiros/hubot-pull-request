@@ -23,6 +23,11 @@ Add `hubot-pull-requests` to your `external-scripts.json`:
 
 Run `npm install`.
 
+## Configuration
+
+The plugin depends on a environment variable called `HUBOT_PULL_REQUESTS_CONFIG`.
+... TODO
+
 ## Development notes
 
 In order to improve the plugin, it is quite handy to `npm link`
