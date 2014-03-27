@@ -28,9 +28,10 @@ Run `npm install`.
 The plugin depends on environment variables beginning with `HUBOT_PULL_REQUEST_`.
 The following configurations are available:
 
-* `HUBOT_PULL_REQUEST_GITLAB_HOST` - The hostname of the gitlab server.
+* `HUBOT_PULL_REQUEST_GITLAB_HOST`                - The hostname of the gitlab server.
 * `HUBOT_PULL_REQUEST_GITLAB_BASIC_AUTH_USERNAME` - The username of the basic auth.
 * `HUBOT_PULL_REQUEST_GITLAB_BASIC_AUTH_PASSWORD` - The password of the basic auth.
+* `HUBOT_PULL_REQUEST_GITLAB_API_TOKEN`           - The api token of a gitlab user.
 
 ## Development notes
 
