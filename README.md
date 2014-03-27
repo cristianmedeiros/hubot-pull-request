@@ -17,9 +17,9 @@ Add `hubot-pull-requests` to your `package.json` file:
 
 Add `hubot-pull-requests` to your `external-scripts.json`:
 
-´´´
+```
 ["hubot-pull-requests"]
-´´´
+```
 
 Run `npm install`.
 
