@@ -1,0 +1,24 @@
+{
+  "name": "hubot-pull-requests",
+  "version": "0.0.0",
+  "description": "A hubot script that handles merge requests (Gitlab) and pull requests (Github).",
+  "main": "index.coffee",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/blacklane/hubot-pull-requests.git"
+  },
+  "keywords": [
+    "hubot",
+    "pull-request",
+    "merge-request"
+  ],
+  "author": "Sascha Depold",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/blacklane/hubot-pull-requests/issues"
+  },
+  "homepage": "https://github.com/blacklane/hubot-pull-requests"
+}
