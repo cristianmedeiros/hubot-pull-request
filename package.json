@@ -23,6 +23,7 @@
   "homepage": "https://github.com/blacklane/hubot-pull-request",
   "dependencies": {
     "lodash": "~2.4.1",
-    "underscore.string": "~2.3.3"
+    "underscore.string": "~2.3.3",
+    "request": "~2.34.0"
   }
 }

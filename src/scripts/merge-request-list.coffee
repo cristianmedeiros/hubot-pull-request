@@ -12,4 +12,8 @@ helpers = require path.resolve(__dirname, '..', 'helpers')
 
 module.exports = (robot) ->
   robot.respond /((m(erge-)?r(equest)?)|(p(ull-)?r(equest)?))\slist/, (msg) ->
-    msg.send "omnom"
+    helpers.mergeRequests.read (err, requests) ->
+      if err
+        msg.reply "An error occurred: #{err}"
+      else
+        msg.reply "omnom"
