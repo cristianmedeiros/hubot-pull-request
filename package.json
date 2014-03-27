@@ -20,5 +20,9 @@
   "bugs": {
     "url": "https://github.com/blacklane/hubot-pull-requests/issues"
   },
-  "homepage": "https://github.com/blacklane/hubot-pull-requests"
+  "homepage": "https://github.com/blacklane/hubot-pull-requests",
+  "dependencies": {
+    "lodash": "~2.4.1",
+    "underscore.string": "~2.3.3"
+  }
 }
