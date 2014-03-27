@@ -1,10 +1,10 @@
-# hubot-pull-requests
+# hubot-pull-request
 
 A hubot script that handles merge requests (Gitlab) and pull requests (Github).
 
 ## Installation
 
-Add `hubot-pull-requests` to your `package.json` file:
+Add `hubot-pull-request` to your `package.json` file:
 
 ```
 ...
@@ -15,10 +15,10 @@ Add `hubot-pull-requests` to your `package.json` file:
   }
 ```
 
-Add `hubot-pull-requests` to your `external-scripts.json`:
+Add `hubot-pull-request` to your `external-scripts.json`:
 
 ```
-["hubot-pull-requests"]
+["hubot-pull-request"]
 ```
 
 Run `npm install`.

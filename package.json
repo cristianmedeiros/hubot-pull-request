@@ -1,5 +1,5 @@
 {
-  "name": "hubot-pull-requests",
+  "name": "hubot-pull-request",
   "version": "0.0.0",
   "description": "A hubot script that handles merge requests (Gitlab) and pull requests (Github).",
   "main": "index.coffee",
@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/blacklane/hubot-pull-requests.git"
+    "url": "git://github.com/blacklane/hubot-pull-request.git"
   },
   "keywords": [
     "hubot",
@@ -18,9 +18,9 @@
   "author": "Sascha Depold",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/blacklane/hubot-pull-requests/issues"
+    "url": "https://github.com/blacklane/hubot-pull-request/issues"
   },
-  "homepage": "https://github.com/blacklane/hubot-pull-requests",
+  "homepage": "https://github.com/blacklane/hubot-pull-request",
   "dependencies": {
     "lodash": "~2.4.1",
     "underscore.string": "~2.3.3"
