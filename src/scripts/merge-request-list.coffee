@@ -12,8 +12,17 @@ helpers = require path.resolve(__dirname, '..', 'helpers')
 
 module.exports = (robot) ->
   robot.respond /((m(erge-)?r(equest)?)|(p(ull-)?r(equest)?))\slist/, (msg) ->
-    helpers.mergeRequests.read (err, requests) ->
+    helpers.gitlab.readMergeRequests (err, result) ->
       if err
         msg.reply "An error occurred: #{err}"
       else
-        msg.reply "omnom"
+        answer = ""
+
+        result.forEach (hash) ->
+          if hash.requests.length > 0
+            answer += "\n\n- #{hash.project.name}"
+
+            hash.requests.forEach (request) ->
+              answer += "\n    ##{request.id} #{request.state.toUpperCase()} #{request.title}"
+
+        msg.send answer
