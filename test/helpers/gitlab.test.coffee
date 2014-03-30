@@ -28,7 +28,7 @@ describe 'helpers', ->
 
           @requestOptions = gitlab.generateRequestOptions '/api/v3/projects'
 
-        it 'foo', ->
+        it 'returns the correct basic auth options', ->
           expect(@requestOptions.auth).to.eql(
             user: 'user',
             pass: 'pass'
