@@ -1,11 +1,11 @@
 # Description:
-#   Interacts with merge / pull requests of Gitlab and Github.
+#   Lists merge / pull requests of Gitlab and Github.
 #
 # Commands:
-#   hubot merge-request list <scope> - Returns a list of all merge/pull requests.
-#   hubot mr list <scope>            - Returns a list of all merge/pull requests.
-#   hubot pull-request list  <scope> - Returns a list of all merge/pull requests.
-#   hubot pr list <scope>            - Returns a list of all merge/pull requests.
+#   hubot merge-request assign <scope> - Returns a list of all merge/pull requests.
+#   hubot mr list <scope>              - Returns a list of all merge/pull requests.
+#   hubot pull-request list  <scope>   - Returns a list of all merge/pull requests.
+#   hubot pr list <scope>              - Returns a list of all merge/pull requests.
 #
 # Scopes:
 #   open:   All open merge requests. This is the default.
@@ -43,7 +43,7 @@ module.exports = (robot) ->
               _s.startsWith(request.state.toLowerCase(), scope.toLowerCase())
 
           if requests.length > 0
-            answer += "\n\n- #{hash.project.name}"
+            answer += "\n\n- #{hash.project.path_with_namespace}"
 
             requests.forEach (request) ->
               answer += "\n    ##{request.id} #{request.state.toUpperCase()} #{request.title}"
