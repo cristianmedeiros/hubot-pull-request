@@ -35,17 +35,27 @@ module.exports =
     _.extend(options, otherOptions)
 
   #
+  # callApi - Calls the API and returns its data as a properly transformed object.
+  #
+  # Parameters:
+  # - path: A path on the remote server.
+  # - callback: A function that gets called, once the server has responded.
+  #
+  callApi: (path, callback) ->
+    request @generateRequestOptions(path), (err, response, body) ->
+      if err
+        callback(err, null)
+      else
+        callback(null, JSON.parse(body))
+
+  #
   # readProjects - Return the projects of the gitlab server to the passed callback.
   #
   # Parameters:
   # - callback: A function that gets called, once the result is in place.
   #
   readProjects: (callback) ->
-    request @generateRequestOptions('/api/v3/projects'), (err, response, body) ->
-      if err
-        callback(err, null)
-      else
-        callback(null, JSON.parse(body))
+    @callApi '/api/v3/projects', callback
 
   #
   # readMergeRequestPageFor - Returns a page slice of merge requests for a project.
@@ -56,11 +66,7 @@ module.exports =
   # - callback: A function that gets called, once the result is in place.
   #
   readMergeRequestPageFor: (project, page, callback) ->
-    request @generateRequestOptions("/api/v3/projects/#{project.id}/merge_requests?page=#{page}"), (err, response, body) ->
-      if err
-        callback(err, null)
-      else
-        callback(null, JSON.parse(body))
+    @callApi "/api/v3/projects/#{project.id}/merge_requests?page=#{page}", callback
 
   #
   # readMergeRequestFor - Returns merge requests for a project.
