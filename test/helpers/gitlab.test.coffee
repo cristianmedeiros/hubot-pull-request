@@ -1,5 +1,6 @@
 expect  = require 'expect.js'
 path    = require 'path'
+sinon   = require 'sinon'
 support = require path.resolve(__dirname, '..', 'support')
 gitlab  = require path.resolve(__dirname, '..', '..', 'src', 'helpers', 'gitlab')
 
@@ -43,3 +44,12 @@ describe 'helpers', ->
             user: 'user',
             pass: 'pass'
           )
+
+    describe 'readProjects', ->
+      it 'reads the projects from the API', ->
+        mock     = sinon.mock(gitlab)
+        callback = sinon.spy()
+
+        mock.expects('callApi').withArgs('/api/v3/projects', callback)
+        gitlab.readProjects callback
+        mock.verify()
