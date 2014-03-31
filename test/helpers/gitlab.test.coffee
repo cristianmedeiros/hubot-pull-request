@@ -1,10 +1,20 @@
 expect  = require 'expect.js'
 path    = require 'path'
+support = require path.resolve(__dirname, '..', 'support')
 gitlab  = require path.resolve(__dirname, '..', '..', 'src', 'helpers', 'gitlab')
 
 describe 'helpers', ->
   describe 'gitlab', ->
+    beforeEach ->
+      support.cleanUpEnvironment()
+
     describe 'generateRequestOptions', ->
+      describe 'without environment variables', ->
+        it 'throws an error', ->
+          expect(->
+            gitlab.generateRequestOptions '/api/v3/projects'
+          ).to.throwError(/no configuration for gitlab/)
+
       describe 'with gitlab host and api key', ->
         beforeEach ->
           process.env.HUBOT_PULL_REQUEST_GITLAB_HOST = 'http://localhost:1234'
@@ -33,4 +43,3 @@ describe 'helpers', ->
             user: 'user',
             pass: 'pass'
           )
-
