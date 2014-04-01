@@ -1,5 +1,6 @@
-helpers = require path.resolve(__dirname, '..', 'helpers')
+path    = require 'path'
 _s      = require 'underscore.string'
+helpers = require path.resolve(__dirname, '..', 'helpers')
 
 module.exports =
   render: (scope, callback) ->
@@ -27,4 +28,4 @@ module.exports =
             requests.forEach (request) ->
               answer += "\n    ##{request.id} #{request.state.toUpperCase()} #{request.title}"
 
-        callback(err, null)
+        callback null, answer
