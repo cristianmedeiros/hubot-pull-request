@@ -110,3 +110,11 @@ describe 'helpers', ->
         gitlab.readMergeRequestFor id: 1, (err, result) ->
           expect(err).to.be.an(Error)
           done()
+
+      it 'returns an empty array if there are no merge requests for this project', (done) ->
+        this.stubApiFor "/api/v3/projects/1/merge_requests?page=1", null, []
+
+        gitlab.readMergeRequestFor id: 1, (err, result) ->
+          expect(err).to.be(null)
+          expect(result).to.have.length(0)
+          done()
