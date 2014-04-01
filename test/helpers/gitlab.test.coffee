@@ -281,32 +281,45 @@ describe 'helpers', ->
           done()
 
       it 'propagates an error if merge request assignment fails', (done) ->
-        this.stubApiFor '/api/v3/projects', null, [{ id: 1, path_with_namespace: 'company/project-1' }]
+        projects = [{ id: 1, path_with_namespace: 'company/project-1', namespace: { id: 1 } }]
+
+        this.stubApiFor '/api/v3/projects', null, projects
         this.stubApiFor '/api/v3/projects/1/merge_requests?page=1', null, [{ id: 1, iid: 11, state: 'opened' }]
         this.stubApiFor '/api/v3/projects/1/merge_requests?page=2', null, []
         this.stubApiFor '/api/v3/projects/1/members', null, [{ id: 1 }]
         this.stubApiFor '/api/v3/projects/1/merge_request/1?assignee_id=1', 'ohoh', null
+        this.stubApiFor '/api/v3/groups/1', null, { id: 1, projects: projects }
+        this.stubApiFor '/api/v3/groups/1/members', null, [{ id: 1, projects: projects }]
 
         gitlab.assignMergeRequest 'company/proje', 11, (err, mergeRequest) ->
           expect(err).to.match(/ohoh/)
           done()
 
       it 'propagates an error about non-open state of the merge request', (done) ->
-        this.stubApiFor '/api/v3/projects', null, [{ id: 1, path_with_namespace: 'company/project-1' }]
+        projects = [{ id: 1, path_with_namespace: 'company/project-1', namespace: { id: 1 } }]
+
+        this.stubApiFor '/api/v3/projects', null, projects
         this.stubApiFor '/api/v3/projects/1/merge_requests?page=1', null, [{ id: 1, iid: 11, state: 'closed' }]
         this.stubApiFor '/api/v3/projects/1/merge_requests?page=2', null, []
         this.stubApiFor '/api/v3/projects/1/members', null, [{ id: 1 }]
+        this.stubApiFor '/api/v3/projects/1/merge_request/1?assignee_id=1', null, { id: 1, state: 'opened' }
+        this.stubApiFor '/api/v3/groups/1', null, { id: 1, projects: projects }
+        this.stubApiFor '/api/v3/groups/1/members', null, [{ id: 1, projects: projects }]
 
         gitlab.assignMergeRequest 'company/proje', 11, (err, mergeRequest) ->
           expect(err).to.match(/The merge request is already closed/)
           done()
 
       it 'just works if everything is nice', (done) ->
-        this.stubApiFor '/api/v3/projects', null, [{ id: 1, path_with_namespace: 'company/project-1' }]
+        projects = [{ id: 1, path_with_namespace: 'company/project-1', namespace: { id: 1 } }]
+
+        this.stubApiFor '/api/v3/projects', null, projects
         this.stubApiFor '/api/v3/projects/1/merge_requests?page=1', null, [{ id: 1, iid: 11, state: 'opened' }]
         this.stubApiFor '/api/v3/projects/1/merge_requests?page=2', null, []
         this.stubApiFor '/api/v3/projects/1/members', null, [{ id: 1 }]
         this.stubApiFor '/api/v3/projects/1/merge_request/1?assignee_id=1', null, { id: 1, state: 'opened' }
+        this.stubApiFor '/api/v3/groups/1', null, { id: 1, projects: projects }
+        this.stubApiFor '/api/v3/groups/1/members', null, [{ id: 1, projects: projects }]
 
         gitlab.assignMergeRequest 'company/proje', 11, (err, mergeRequest) ->
           expect(err).to.be(null)

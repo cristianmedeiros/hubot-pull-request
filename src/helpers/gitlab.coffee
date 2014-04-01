@@ -262,7 +262,7 @@ module.exports =
           else if !mergeRequest.isOpen
             callback new Error("The merge request is already #{mergeRequest.state}!"), null
           else
-            @readGroup project.data.namespace.id, (err, group) =>
+            @readGroup project.ownerId, (err, group) =>
               if err
                 callback err, null
               else
