@@ -1,4 +1,4 @@
-# hubot-pull-request
+# hubot-pull-request [![Build Status](https://travis-ci.org/blacklane/hubot-pull-request.svg?branch=master)](https://travis-ci.org/blacklane/hubot-pull-request)
 
 A hubot script that handles merge requests (Gitlab) and pull requests (Github).
 
