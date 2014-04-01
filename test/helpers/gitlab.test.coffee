@@ -1,8 +1,10 @@
-expect  = require 'expect.js'
-path    = require 'path'
-sinon   = require 'sinon'
-support = require path.resolve(__dirname, '..', 'support')
-gitlab  = require path.resolve(__dirname, '..', '..', 'src', 'helpers', 'gitlab')
+expect       = require 'expect.js'
+path         = require 'path'
+sinon        = require 'sinon'
+support      = require path.resolve __dirname, '..', 'support'
+gitlab       = require path.resolve __dirname, '..', '..', 'src', 'helpers', 'gitlab'
+Project      = require path.resolve __dirname, '..', '..', 'src', 'models', 'project'
+MergeRequest = require path.resolve __dirname, '..', '..', 'src', 'models', 'merge-request'
 
 describe 'helpers', ->
   describe 'gitlab', ->
@@ -77,17 +79,34 @@ describe 'helpers', ->
           done()
 
     describe 'readMergeRequestPageFor', ->
-      it 'reads the merge requests for the correct project and the correct page', (done) ->
-        stub = this.stubApi null, []
+      it 'throws an error if no instance of Project is passed', ->
+        expect(->
+          gitlab.readMergeRequestPageFor id: 1, 1, ->
+        ).to.throwError(/no instance of Project/)
 
-        gitlab.readMergeRequestPageFor id: 2, 3, ->
+      it 'reads the merge requests for the correct project and the correct page', (done) ->
+        stub    = this.stubApi null, []
+        project = new Project id: 2
+
+        gitlab.readMergeRequestPageFor project, 3, ->
           expect(stub.firstCall.args[0]).to.equal('/api/v3/projects/2/merge_requests?page=3')
+          done()
+
+      it 'returns MergeRequest instances', (done) ->
+        this.stubApiFor "/api/v3/projects/1/merge_requests?page=1", null, [{}, {}, {}]
+
+        project = new Project id: 1
+
+        gitlab.readMergeRequestPageFor project, 1, (err, mergeRequests) ->
+          expect(mergeRequests).to.have.length(3)
+          mergeRequests.forEach (mergeRequest) ->
+            expect(mergeRequest).to.be.a(MergeRequest)
           done()
 
     describe 'readMergeRequestFor', ->
       it 'propagates an error if one occurred', (done) ->
         stub    = this.stubApi new Error('omnom'), null
-        project = { id: 1 }
+        project = new Project id: 1
 
         gitlab.readMergeRequestFor project, (err, result) ->
           expect(err).to.be.an(Error)
@@ -98,7 +117,9 @@ describe 'helpers', ->
         this.stubApiFor "/api/v3/projects/1/merge_requests?page=2", null, [{}]
         this.stubApiFor "/api/v3/projects/1/merge_requests?page=3", null, []
 
-        gitlab.readMergeRequestFor id: 1, (err, result) ->
+        project = new Project id: 1
+
+        gitlab.readMergeRequestFor project, (err, result) ->
           expect(err).to.be(null)
           expect(result).to.have.length(4)
           done()
@@ -107,14 +128,18 @@ describe 'helpers', ->
         [1..100].forEach (i) =>
           this.stubApiFor "/api/v3/projects/1/merge_requests?page=#{i}", null, [{}]
 
-        gitlab.readMergeRequestFor id: 1, (err, result) ->
+        project = new Project id: 1
+
+        gitlab.readMergeRequestFor project, (err, result) ->
           expect(err).to.be.an(Error)
           done()
 
       it 'returns an empty array if there are no merge requests for this project', (done) ->
         this.stubApiFor "/api/v3/projects/1/merge_requests?page=1", null, []
 
-        gitlab.readMergeRequestFor id: 1, (err, result) ->
+        project = new Project id: 1
+
+        gitlab.readMergeRequestFor project, (err, result) ->
           expect(err).to.be(null)
           expect(result).to.have.length(0)
           done()
@@ -138,7 +163,9 @@ describe 'helpers', ->
 
         it "returns an array with one item", (done) ->
           gitlab.readMergeRequests (err, mergeRequests) ->
-            expect(mergeRequests).to.eql([{
+            expect(mergeRequests).to.be.an(Array)
+            expect(mergeRequests).to.have.length(1)
+            expect(support.toJSON(mergeRequests)).to.eql([{
               project:  { id: 1 },
               requests: [{}]
             }])
@@ -151,9 +178,9 @@ describe 'helpers', ->
           this.stubApiFor "/api/v3/projects/1/merge_requests?page=2", null, []
           this.stubApiFor "/api/v3/projects/2/merge_requests?page=1", null, []
 
-        it "returns an array with one item", (done) ->
+        it "returns an array with multiple items", (done) ->
           gitlab.readMergeRequests (err, mergeRequests) ->
-            expect(mergeRequests).to.eql([{
+            expect(support.toJSON(mergeRequests)).to.eql([{
               project:  { id: 1 },
               requests: [{}]
             }, {
