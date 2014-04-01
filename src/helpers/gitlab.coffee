@@ -131,7 +131,6 @@ module.exports =
 
   readMergeRequestViaPublicId: (project, publicId, callback) ->
     @readMergeRequestsFor project, (err, mergeRequests) =>
-      console.log(err, mergeRequests)
       matchingRequests = mergeRequests.filter (mergeRequest) ->
         parseInt(mergeRequest.publicId, 10) == parseInt(publicId, 10)
 
