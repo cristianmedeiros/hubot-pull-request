@@ -4,7 +4,8 @@
   "description": "A hubot script that handles merge requests (Gitlab) and pull requests (Github).",
   "main": "index.coffee",
   "scripts": {
-    "test": "node_modules/.bin/mocha test/**/*.test.coffee --compilers coffee:coffee-script/register"
+    "test": "node_modules/.bin/mocha test/**/*.test.coffee --compilers coffee:coffee-script/register",
+    "watch": "fswatch . 'clear && npm test'"
   },
   "repository": {
     "type": "git",
