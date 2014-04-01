@@ -6,6 +6,7 @@ async        = require 'async'
 getConfigs   = require path.resolve __dirname, 'get-configs'
 Project      = require path.resolve __dirname, '..', 'models', 'project'
 MergeRequest = require path.resolve __dirname, '..', 'models', 'merge-request'
+User         = require path.resolve __dirname, '..', 'models', 'user'
 
 module.exports =
   #
@@ -44,8 +45,8 @@ module.exports =
   # - path: A path on the remote server.
   # - callback: A function that gets called, once the server has responded.
   #
-  callApi: (path, callback) ->
-    request @generateRequestOptions(path), (err, response, body) ->
+  callApi: (path, callback, options={}) ->
+    request @generateRequestOptions(path, options), (err, response, body) ->
       if err
         callback(err, null)
       else
@@ -121,11 +122,12 @@ module.exports =
     unless project instanceof Project
       throw new Error('The passed argument is no instance of Project.')
 
-    @callApi "/api/v3/projects/#{project.id}/merge_requests/#{id}", (err, request) ->
+    @callApi "/api/v3/projects/#{project.id}/merge_request/#{id}", (err, request) ->
       if request &&= new MergeRequest(request)
         callback null, request
       else
-        callback new Error("Unable to find merge request ##{id} for project '#{project.displayName}'."), request
+        err ||= new Error("Unable to find merge request ##{id} for project '#{project.displayName}'.")
+        callback err, null
 
   #
   # readMergeRequests - Returns merge requests for all project.
@@ -173,7 +175,57 @@ module.exports =
         else
           callback null, projects[0]
 
+  readProjectMembers: (project, callback) ->
+    @callApi "/api/v3/projects/#{project.id}/members", (err, members) ->
+      if err
+        callback err, null
+      else if members.length == 0
+        callback new Error("No members found for project '#{project.displayName}'"), null
+      else
+        members &&= members.map (member) -> new User(member)
+        callback null, members
+
+  assignMergeRequestTo: (member, project, mergeRequest, callback) ->
+    unless member instanceof User
+      throw new Error('The passed argument is no instance of Member.')
+
+    unless project instanceof Project
+      throw new Error('The passed argument is no instance of Project.')
+
+    unless mergeRequest instanceof MergeRequest
+      throw new Error('The passed argument is no instance of MergeRequest.')
+
+    url       = "/api/v3/projects/#{project.id}/merge_request/#{mergeRequest.id}?assignee_id=#{member.id}"
+    _callback = (err, mergeRequest) ->
+      if err
+        callback err, null
+      else
+        mergeRequest &&= new MergeRequest(mergeRequest)
+        callback null, mergeRequest
+
+    @callApi url, _callback, method: 'PUT'
+
   #
-  # assignMergeRequest - Assigns a merge request to a company member.
+  # assignMergeRequest - Assigns a merge request to a random project member.
   #
   assignMergeRequest: (projectName, mergeRequestId, callback) ->
+    @searchProject projectName, (err, project) =>
+      if err
+        callback err, null
+      else
+        @readMergeRequest project, mergeRequestId, (err, mergeRequest) =>
+          if err
+            callback err, null
+          else if !mergeRequest.isOpen
+            callback new Error("The merge request is already #{mergeRequest.state}!"), null
+          else
+            @readProjectMembers project, (err, members) =>
+              if err
+                callback err, null
+              else
+                member = _.sample(members)
+                @assignMergeRequestTo member, project, mergeRequest, (err, mergeRequest) =>
+                  if err
+                    callback err, null
+                  else
+                    callback null, mergeRequest

@@ -191,12 +191,12 @@ describe 'helpers', ->
 
     describe 'readMergeRequest', ->
       beforeEach ->
-        this.stubApiFor "/api/v3/projects/1/merge_requests/1", null, {
+        this.stubApiFor "/api/v3/projects/1/merge_request/1", null, {
           id: 1,
           state: 'merged',
           title: 'omg this is urgent'
         }
-        this.stubApiFor "/api/v3/projects/1/merge_requests/2", null, null
+        this.stubApiFor "/api/v3/projects/1/merge_request/2", null, null
 
       it 'returns the merge request if available', (done) ->
         project = new Project(id: 1)
@@ -239,3 +239,7 @@ describe 'helpers', ->
           expect(project).to.be.a(Project)
           expect(project.displayName).to.equal('company/project-1')
           done()
+
+    describe 'readProjectMembers', ->
+      beforeEach ->
+        this.stubApiFor '/api/v3/projects/1/members', null, []

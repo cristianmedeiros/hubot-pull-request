@@ -7,5 +7,12 @@ module.exports = class MergeRequest
 
   @property 'id', get: -> @data.id
   @property 'state', get: -> @data.state
-  @property 'displayState', get: -> @state.toUpperCase()
+  @property 'isOpen', get: -> @data.state == 'opened'
+  @property 'displayState', get: -> @state
   @property 'title', get: -> @data.title
+  @property 'displayAssignee', get: -> @data.assignee.username
+  @property 'condensed', get: ->
+    if @data.assignee
+      "» #{@displayState} » #{@displayAssignee} » #{@title}"
+    else
+      "» #{@displayState} » unassigned » #{@title}"

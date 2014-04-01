@@ -26,6 +26,6 @@ module.exports =
             answer += "\n\n- #{hash.project.displayName}"
 
             requests.forEach (request) ->
-              answer += "\n    ##{request.id} #{request.displayState} #{request.title}"
+              answer += "\n    #{request.condensed}"
 
         callback null, answer

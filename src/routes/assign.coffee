@@ -21,13 +21,15 @@ module.exports = (robot) ->
   routeRegExp = /((m(erge-)?r(equest)?)|(p(ull-)?r(equest)?))\sa(ssign)?/
 
   robot.respond routeRegExp, (msg) ->
-    console.log msg.envelope.message.text
-    # scope = msg.envelope.message.text.replace(/(^bender )/, "").replace(routeRegExp, "").trim()
-    #
-    # msg.reply "Assigning the merge requests ..."
-    #
-    # view.render scope, (err, content) ->
-    #   if err
-    #     msg.reply "An error occurred: #{err}"
-    #   else
-    #     msg.send content
+    message        = msg.envelope.message.text.replace(/(^bender )/, "").replace(routeRegExp, "").trim()
+    match          = message.match(/([^\s]+)\s#?([\d]+)/)
+    projectName    = match[1]
+    mergeRequestId = match[2]
+
+    msg.reply "Assigning merge request ##{mergeRequestId} of #{projectName} ..."
+
+    view.render projectName, mergeRequestId, (err, content) ->
+      if err
+        msg.reply "An error occurred: #{err}"
+      else
+        msg.send content
