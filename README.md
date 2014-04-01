@@ -2,6 +2,10 @@
 
 A hubot script that handles merge requests (Gitlab) and pull requests (Github).
 
+## Tiny note
+
+- Github is not yet supported.
+
 ## Installation
 
 Add `hubot-pull-request` to your `package.json` file:
