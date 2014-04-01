@@ -2,10 +2,10 @@
 #   Lists merge / pull requests of Gitlab and Github.
 #
 # Commands:
-#   hubot merge-request assign <scope> - Returns a list of all merge/pull requests.
-#   hubot mr list <scope>              - Returns a list of all merge/pull requests.
-#   hubot pull-request list  <scope>   - Returns a list of all merge/pull requests.
-#   hubot pr list <scope>              - Returns a list of all merge/pull requests.
+#   hubot merge-request list <scope> - Returns a list of all merge/pull requests.
+#   hubot mr list <scope>            - Returns a list of all merge/pull requests.
+#   hubot pull-request list  <scope> - Returns a list of all merge/pull requests.
+#   hubot pr list <scope>            - Returns a list of all merge/pull requests.
 #
 # Scopes:
 #   open:   All open merge requests. This is the default.
