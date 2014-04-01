@@ -176,6 +176,9 @@ module.exports =
           callback null, projects[0]
 
   readProjectMembers: (project, callback) ->
+    unless project instanceof Project
+      throw new Error('The passed argument is no instance of Project.')
+      
     @callApi "/api/v3/projects/#{project.id}/members", (err, members) ->
       if err
         callback err, null
