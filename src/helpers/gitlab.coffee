@@ -178,7 +178,7 @@ module.exports =
   readProjectMembers: (project, callback) ->
     unless project instanceof Project
       throw new Error('The passed argument is no instance of Project.')
-      
+
     @callApi "/api/v3/projects/#{project.id}/members", (err, members) ->
       if err
         callback err, null
@@ -210,6 +210,11 @@ module.exports =
 
   #
   # assignMergeRequest - Assigns a merge request to a random project member.
+  #
+  # Parameters:
+  # - projectName: A needle that will be used for searching the relevant projects.
+  # - mergeRequestId: An ID of a merge request.
+  # - callback: A function that gets called, once the result is in place.
   #
   assignMergeRequest: (projectName, mergeRequestId, callback) ->
     @searchProject projectName, (err, project) =>
