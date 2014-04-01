@@ -23,9 +23,10 @@ module.exports =
               _s.startsWith(request.state.toLowerCase(), scope.toLowerCase())
 
           if requests.length > 0
-            answer += "\n\n- #{hash.project.displayName}"
+            answer += "\n\n#{hash.project.displayName}"
+            answer += "\n#{[1..hash.project.displayName.length].map(-> '-').join('')}"
 
             requests.forEach (request) ->
-              answer += "\n    #{request.condensed}"
+              answer += "\n#{request.condensed}"
 
-        callback null, answer
+        callback null, "/quote #{answer.trim()}"

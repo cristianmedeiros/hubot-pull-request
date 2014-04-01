@@ -23,19 +23,19 @@ describe 'views', ->
       it 'returns only the open merge requests', (done) ->
         view.render null, (err, content) ->
           expect(err).to.be(null)
-          expect(content).to.equal('\n\n- company/project1\n    » opened » unassigned » fixed type')
+          expect(content).to.equal('/quote company/project1\n----------------\n2 » opened » unassigned » fixed type')
           done()
 
     describe "with 'merged' scope", ->
       it 'returns only the merged merge requests', (done) ->
         view.render 'merged', (err, content) ->
           expect(err).to.be(null)
-          expect(content).to.equal('\n\n- company/project1\n    » merged » unassigned » omg this is urgent')
+          expect(content).to.equal('/quote company/project1\n----------------\n1 » merged » unassigned » omg this is urgent')
           done()
 
     describe "with '*' scope", ->
       it 'returns all merge requests', (done) ->
         view.render '*', (err, content) ->
           expect(err).to.be(null)
-          expect(content).to.equal('\n\n- company/project1\n    » merged » unassigned » omg this is urgent\n    » opened » unassigned » fixed type')
+          expect(content).to.equal('/quote company/project1\n----------------\n1 » merged » unassigned » omg this is urgent\n2 » opened » unassigned » fixed type')
           done()

@@ -241,5 +241,24 @@ describe 'helpers', ->
           done()
 
     describe 'readProjectMembers', ->
-      beforeEach ->
+      it 'throws an error if no project instance is passed', ->
+        expect(->
+          gitlab.readProjectMembers { id: 1 }
+        ).to.throwError(/passed argument is no instance of Project/)
+
+      it 'propagates an error if no users are available', (done) ->
+        project = new Project(id: 1)
+
         this.stubApiFor '/api/v3/projects/1/members', null, []
+        gitlab.readProjectMembers project, (err, user) ->
+          expect(err).to.be.an(Error)
+          expect(err).to.match(/No members found/)
+          done()
+
+      it 'propagates api call errors', (done) ->
+        project = new Project(id: 1)
+
+        this.stubApiFor '/api/v3/projects/1/members', new Error('omg omg omg'), null
+        gitlab.readProjectMembers project, (err, user) ->
+          expect(err).to.be.an(Error)
+          done()
