@@ -14,9 +14,8 @@
 #   *:      All merge requests
 #
 
-path    = require 'path'
-helpers = require path.resolve(__dirname, '..', 'helpers')
-_s      = require 'underscore.string'
+path = require 'path'
+view = require path.resolve(__dirname, '..', 'views', 'merge-request-list')
 
 module.exports = (robot) ->
   routeRegExp = /((m(erge-)?r(equest)?)|(p(ull-)?r(equest)?))\slist/
@@ -24,28 +23,8 @@ module.exports = (robot) ->
   robot.respond routeRegExp, (msg) ->
     scope = msg.envelope.message.text.replace(/(^bender )/, "").replace(routeRegExp, "").trim()
 
-    helpers.gitlab.readMergeRequests (err, result) ->
+    view.render scope, (err, content) ->
       if err
         msg.reply "An error occurred: #{err}"
       else
-        answer = ""
-
-        result.forEach (hash) ->
-          requests = hash.requests
-
-          if scope == '*'
-            scope = ''
-          else
-            scope ||= 'open'
-
-          if scope != ''
-            requests = requests.filter (request) ->
-              _s.startsWith(request.state.toLowerCase(), scope.toLowerCase())
-
-          if requests.length > 0
-            answer += "\n\n- #{hash.project.path_with_namespace}"
-
-            requests.forEach (request) ->
-              answer += "\n    ##{request.id} #{request.state.toUpperCase()} #{request.title}"
-
-        msg.send answer
+        msg.send content

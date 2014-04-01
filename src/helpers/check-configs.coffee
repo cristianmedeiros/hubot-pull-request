@@ -1,5 +1,5 @@
 path       = require 'path'
-getConfigs = require path.resolve(__dirname, 'get_configs')
+getConfigs = require path.resolve(__dirname, 'get-configs')
 
 module.exports = ->
   if Object.keys(getConfigs()).length == 0

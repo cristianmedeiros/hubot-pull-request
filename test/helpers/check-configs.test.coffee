@@ -1,7 +1,7 @@
 expect       = require 'expect.js'
 path         = require 'path'
 support      = require path.resolve(__dirname, '..', 'support')
-checkConfigs = require path.resolve(__dirname, '..', '..', 'src', 'helpers', 'check_configs')
+checkConfigs = require path.resolve(__dirname, '..', '..', 'src', 'helpers', 'check-configs')
 
 describe 'helpers', ->
   describe 'checkConfigs', ->

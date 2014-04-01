@@ -1,5 +1,5 @@
 path       = require 'path'
-getConfigs = require path.resolve(__dirname, 'get_configs')
+getConfigs = require path.resolve(__dirname, 'get-configs')
 request    = require 'request'
 _          = require 'lodash'
 async      = require 'async'
