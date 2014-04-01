@@ -1,7 +1,7 @@
 expect  = require 'expect.js'
 path    = require 'path'
 support = require path.resolve(__dirname, '..', 'support')
-view    = require path.resolve(__dirname, '..', '..', 'src', 'views', 'merge-request-list')
+view    = require path.resolve(__dirname, '..', '..', 'src', 'views', 'list')
 
 describe 'views', ->
   describe 'merge-request-list', ->

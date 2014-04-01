@@ -2,10 +2,10 @@
 #   Lists merge / pull requests of Gitlab and Github.
 #
 # Commands:
-#   hubot merge-request list <scope> - Returns a list of all merge/pull requests.
-#   hubot mr list <scope>            - Returns a list of all merge/pull requests.
-#   hubot pull-request list  <scope> - Returns a list of all merge/pull requests.
-#   hubot pr list <scope>            - Returns a list of all merge/pull requests.
+#   hubot merge-request l(ist) <scope> - Returns a list of all merge/pull requests.
+#   hubot mr l(ist) <scope>            - Returns a list of all merge/pull requests.
+#   hubot pull-request l(ist)  <scope> - Returns a list of all merge/pull requests.
+#   hubot pr l(ist) <scope>            - Returns a list of all merge/pull requests.
 #
 # Scopes:
 #   open:   All open merge requests. This is the default.
@@ -15,10 +15,10 @@
 #
 
 path = require 'path'
-view = require path.resolve(__dirname, '..', 'views', 'merge-request-list')
+view = require path.resolve(__dirname, '..', 'views', 'list')
 
 module.exports = (robot) ->
-  routeRegExp = /((m(erge-)?r(equest)?)|(p(ull-)?r(equest)?))\slist/
+  routeRegExp = /((m(erge-)?r(equest)?)|(p(ull-)?r(equest)?))\sl(ist)?/
 
   robot.respond routeRegExp, (msg) ->
     scope = msg.envelope.message.text.replace(/(^bender )/, "").replace(routeRegExp, "").trim()
