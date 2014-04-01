@@ -82,13 +82,13 @@ module.exports =
       callback err, requests
 
   #
-  # readMergeRequestFor - Returns merge requests for a project.
+  # readMergeRequestsFor - Returns merge requests for a project.
   #
   # Parameters:
   # - project: A project, read via readProjects.
   # - callback: A function that gets called, once the result is in place.
   #
-  readMergeRequestFor: (project, callback) ->
+  readMergeRequestsFor: (project, callback) ->
     unless project instanceof Project
       throw new Error('The passed argument is no Project.')
 
@@ -129,6 +129,23 @@ module.exports =
         err ||= new Error("Unable to find merge request ##{id} for project '#{project.displayName}'.")
         callback err, null
 
+  readMergeRequestViaPublicId: (project, publicId, callback) ->
+    @readMergeRequestsFor project, (err, mergeRequests) =>
+      console.log(err, mergeRequests)
+      matchingRequests = mergeRequests.filter (mergeRequest) ->
+        parseInt(mergeRequest.publicId, 10) == parseInt(publicId, 10)
+
+      if matchingRequests.length == 0
+        err ||= new Error("Unable to find merge request ##{publicId} for project '#{project.displayName}'.")
+      else if matchingRequests.length > 1
+        err ||= new Error('Too many merge requests found.')
+
+      if err
+        callback err, null
+      else
+        callback null, matchingRequests[0]
+
+
   #
   # readMergeRequests - Returns merge requests for all project.
   #
@@ -148,7 +165,7 @@ module.exports =
         async.map(
           projects,
           (project, callback) =>
-            @readMergeRequestFor project, (err, requests) ->
+            @readMergeRequestsFor project, (err, requests) ->
               callback(err, { project: project, requests: requests })
           callback
         )
@@ -221,7 +238,7 @@ module.exports =
       if err
         callback err, null
       else
-        @readMergeRequest project, mergeRequestId, (err, mergeRequest) =>
+        @readMergeRequestViaPublicId project, mergeRequestId, (err, mergeRequest) =>
           if err
             callback err, null
           else if !mergeRequest.isOpen

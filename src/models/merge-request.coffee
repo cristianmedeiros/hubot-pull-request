@@ -6,6 +6,7 @@ module.exports = class MergeRequest
   toJSON: -> @data
 
   @property 'id', get: -> @data.id
+  @property 'publicId', get: -> @data.iid
   @property 'state', get: -> @data.state
   @property 'isOpen', get: -> @data.state == 'opened'
   @property 'displayState', get: -> @state
@@ -13,4 +14,4 @@ module.exports = class MergeRequest
   @property 'displayAssignee', get: -> @data.assignee.username
   @property 'condensed', get: ->
     assignee = if @data.assignee then @displayAssignee else 'unassigned'
-    "#{@id} » #{@displayState} » #{assignee} » #{@title}"
+    "#{@publicId} » #{@displayState} » #{assignee} » #{@title}"
