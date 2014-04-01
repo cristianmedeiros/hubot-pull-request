@@ -118,3 +118,46 @@ describe 'helpers', ->
           expect(err).to.be(null)
           expect(result).to.have.length(0)
           done()
+
+    describe 'readMergeRequests', ->
+      describe 'without any projects', ->
+        beforeEach ->
+          this.stubApiFor "/api/v3/projects", null, []
+
+        it 'returns an empty array', (done) ->
+          gitlab.readMergeRequests (err, mergeRequests) ->
+            expect(mergeRequests).to.be.an(Array)
+            expect(mergeRequests).to.have.length(0)
+            done()
+
+      describe 'with one project', ->
+        beforeEach ->
+          this.stubApiFor "/api/v3/projects", null, [id: 1]
+          this.stubApiFor "/api/v3/projects/1/merge_requests?page=1", null, [{}]
+          this.stubApiFor "/api/v3/projects/1/merge_requests?page=2", null, []
+
+        it "returns an array with one item", (done) ->
+          gitlab.readMergeRequests (err, mergeRequests) ->
+            expect(mergeRequests).to.eql([{
+              project:  { id: 1 },
+              requests: [{}]
+            }])
+            done()
+
+      describe 'with multiple projects', ->
+        beforeEach ->
+          this.stubApiFor "/api/v3/projects", null, [{id: 1}, {id: 2}]
+          this.stubApiFor "/api/v3/projects/1/merge_requests?page=1", null, [{}]
+          this.stubApiFor "/api/v3/projects/1/merge_requests?page=2", null, []
+          this.stubApiFor "/api/v3/projects/2/merge_requests?page=1", null, []
+
+        it "returns an array with one item", (done) ->
+          gitlab.readMergeRequests (err, mergeRequests) ->
+            expect(mergeRequests).to.eql([{
+              project:  { id: 1 },
+              requests: [{}]
+            }, {
+              project:  { id: 2 },
+              requests: []
+            }])
+            done()
