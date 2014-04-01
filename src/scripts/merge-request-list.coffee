@@ -23,6 +23,8 @@ module.exports = (robot) ->
   robot.respond routeRegExp, (msg) ->
     scope = msg.envelope.message.text.replace(/(^bender )/, "").replace(routeRegExp, "").trim()
 
+    msg.reply "Search for merge requests ..."
+
     view.render scope, (err, content) ->
       if err
         msg.reply "An error occurred: #{err}"
