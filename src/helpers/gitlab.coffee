@@ -110,6 +110,24 @@ module.exports =
     @readMergeRequestPageFor project, page, _callback
 
   #
+  # readMergeRequest - Returns a specific merge request.
+  #
+  # Parameters:
+  # - project: An instance of Project
+  # - id: An id of a merge request
+  # - callback: A function that gets called, once the result is in place.
+  #
+  readMergeRequest: (project, id, callback) ->
+    unless project instanceof Project
+      throw new Error('The passed argument is no instance of Project.')
+
+    @callApi "/api/v3/projects/#{project.id}/merge_requests/#{id}", (err, request) ->
+      if request &&= new MergeRequest(request)
+        callback null, request
+      else
+        callback new Error("Unable to find merge request ##{id} for project '#{project.displayName}'."), request
+
+  #
   # readMergeRequests - Returns merge requests for all project.
   #
   # Parameters:
@@ -121,13 +139,41 @@ module.exports =
   #   - requests: An array of merge requests
   #
   readMergeRequests: (callback) ->
-    self = this
+    @readProjects (err, projects) =>
+      if err
+        callback(err, null)
+      else
+        async.map(
+          projects,
+          (project, callback) =>
+            @readMergeRequestFor project, (err, requests) ->
+              callback(err, { project: project, requests: requests })
+          callback
+        )
 
-    @readProjects (err, projects) ->
-      async.map(
-        projects,
-        (project, callback) ->
-          self.readMergeRequestFor project, (err, requests) ->
-            callback(err, { project: project, requests: requests })
-        callback
-      )
+  #
+  # searchProject - Returns a project that matches the passed needle.
+  #
+  # Parameters:
+  # - needle: A string that gets searched for in the project names.
+  # - callback: A function that gets called, once the result is in place.
+  #
+  searchProject: (needle, callback) ->
+    @readProjects (err, projects) =>
+      if err
+        callback(err, null)
+      else
+        projects = projects.filter (project) ->
+          project.hasName(needle)
+
+        if projects.length == 0
+          callback new Error("Unable to find a project that matches '#{needle}'."), null
+        else if projects.length > 1
+          callback new Error("Multiple projects have been found for '#{needle}'."), null
+        else
+          callback null, projects[0]
+
+  #
+  # assignMergeRequest - Assigns a merge request to a company member.
+  #
+  assignMergeRequest: (projectName, mergeRequestId, callback) ->
