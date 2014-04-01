@@ -33,6 +33,13 @@ The following configurations are available:
 * `HUBOT_PULL_REQUEST_GITLAB_BASIC_AUTH_PASSWORD` - The password of the basic auth.
 * `HUBOT_PULL_REQUEST_GITLAB_API_TOKEN`           - The api token of a gitlab user.
 
+## Running the tests
+
+```
+npm install
+npm test
+```
+
 ## Development notes
 
 In order to improve the plugin, it is quite handy to `npm link`
