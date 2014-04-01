@@ -7,6 +7,7 @@ getConfigs   = require path.resolve __dirname, 'get-configs'
 Project      = require path.resolve __dirname, '..', 'models', 'project'
 MergeRequest = require path.resolve __dirname, '..', 'models', 'merge-request'
 User         = require path.resolve __dirname, '..', 'models', 'user'
+Group        = require path.resolve __dirname, '..', 'models', 'group'
 
 module.exports =
   #
@@ -144,7 +145,6 @@ module.exports =
       else
         callback null, matchingRequests[0]
 
-
   #
   # readMergeRequests - Returns merge requests for all project.
   #
@@ -190,6 +190,25 @@ module.exports =
           callback new Error("Multiple projects have been found for '#{needle}'."), null
         else
           callback null, projects[0]
+
+  readGroup: (groupId, callback) ->
+    @callApi "/api/v3/groups/#{groupId}", (err, group) ->
+      if group &&= new Group(group)
+        callback null, group
+      else
+        err ||= new Error('No group found')
+        callback err, null
+
+  readGroupMembers: (group, callback) ->
+    unless group instanceof Group
+      throw new Error('The passed argument is no instance of Group.')
+
+    @callApi "/api/v3/groups/#{group.id}/members", (err, members) ->
+      if err
+        callback err, null
+      else
+        members &&= members.map (member) -> new User(member)
+        callback null, members
 
   readProjectMembers: (project, callback) ->
     unless project instanceof Project
@@ -243,13 +262,24 @@ module.exports =
           else if !mergeRequest.isOpen
             callback new Error("The merge request is already #{mergeRequest.state}!"), null
           else
-            @readProjectMembers project, (err, members) =>
+            @readGroup project.data.namespace.id, (err, group) =>
               if err
                 callback err, null
               else
-                member = _.sample(members)
-                @assignMergeRequestTo member, project, mergeRequest, (err, mergeRequest) =>
+                @readGroupMembers group, (err, groupMembers) =>
                   if err
                     callback err, null
                   else
-                    callback null, mergeRequest
+                    @readProjectMembers project, (err, projectMembers) =>
+                      if err
+                        callback err, null
+                      else
+                        members = groupMembers.concat projectMembers
+                        members = _.uniq members, (user) -> user.id
+                        member  = _.sample(members)
+
+                        @assignMergeRequestTo member, project, mergeRequest, (err, mergeRequest) =>
+                          if err
+                            callback err, null
+                          else
+                            callback null, mergeRequest
