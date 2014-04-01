@@ -23,9 +23,9 @@ module.exports =
               _s.startsWith(request.state.toLowerCase(), scope.toLowerCase())
 
           if requests.length > 0
-            answer += "\n\n- #{hash.project.path_with_namespace}"
+            answer += "\n\n- #{hash.project.displayName}"
 
             requests.forEach (request) ->
-              answer += "\n    ##{request.id} #{request.state.toUpperCase()} #{request.title}"
+              answer += "\n    ##{request.id} #{request.displayState} #{request.title}"
 
         callback null, answer
