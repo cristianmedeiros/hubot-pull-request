@@ -188,3 +188,54 @@ describe 'helpers', ->
               requests: []
             }])
             done()
+
+    describe 'readMergeRequest', ->
+      beforeEach ->
+        this.stubApiFor "/api/v3/projects/1/merge_requests/1", null, {
+          id: 1,
+          state: 'merged',
+          title: 'omg this is urgent'
+        }
+        this.stubApiFor "/api/v3/projects/1/merge_requests/2", null, null
+
+      it 'returns the merge request if available', (done) ->
+        project = new Project(id: 1)
+
+        gitlab.readMergeRequest project, 1, (err, mergeRequest) ->
+          expect(err).to.be(null)
+          expect(mergeRequest).to.be.a(MergeRequest)
+          expect(mergeRequest.id).to.equal(1)
+          done()
+
+      it 'returns an error if no merge request was available', (done) ->
+        project = new Project(id: 1)
+
+        gitlab.readMergeRequest project, 2, (err, mergeRequest) ->
+          expect(err).to.be.an(Error)
+          expect(err).to.match(/Unable to find merge request #2/)
+          done()
+
+
+    describe 'searchProject', ->
+      beforeEach ->
+        this.stubApiFor "/api/v3/projects", null, [
+          {id: 1, path_with_namespace: 'company/project-1'},
+          {id: 2, path_with_namespace: 'company/project-2'}
+        ]
+
+      it 'throws an error if no projects are matching', (done) ->
+        gitlab.searchProject 'company/project-3', (err, project) ->
+          expect(err).to.match(/Unable to find a project that matches/)
+          done()
+
+      it 'throws an error if multiple projects are matching', (done) ->
+        gitlab.searchProject 'company', (err, project) ->
+          expect(err).to.match(/Multiple projects have been found for/)
+          done()
+
+      it 'returns a single project if only one match is present', (done) ->
+        gitlab.searchProject 'project-1', (err, project) ->
+          expect(err).to.be(null)
+          expect(project).to.be.a(Project)
+          expect(project.displayName).to.equal('company/project-1')
+          done()
