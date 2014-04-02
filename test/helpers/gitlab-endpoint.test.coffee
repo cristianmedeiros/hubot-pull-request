@@ -2,14 +2,14 @@ expect       = require 'expect.js'
 path         = require 'path'
 sinon        = require 'sinon'
 support      = require path.resolve __dirname, '..', 'support'
-gitlab       = require path.resolve __dirname, '..', '..', 'src', 'helpers', 'gitlab'
+gitlab       = require path.resolve __dirname, '..', '..', 'src', 'helpers', 'gitlab-endpoint'
 Project      = require path.resolve __dirname, '..', '..', 'src', 'models', 'project'
 MergeRequest = require path.resolve __dirname, '..', '..', 'src', 'models', 'merge-request'
 Group        = require path.resolve __dirname, '..', '..', 'src', 'models', 'group'
 User         = require path.resolve __dirname, '..', '..', 'src', 'models', 'user'
 
 describe 'helpers', ->
-  describe 'gitlab', ->
+  describe 'gitlabEndpoint', ->
     beforeEach ->
       support.cleanUpEnvironment()
 

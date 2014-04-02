@@ -3,13 +3,14 @@ request      = require 'request'
 _            = require 'lodash'
 async        = require 'async'
 
-getConfigs   = require path.resolve __dirname, 'get-configs'
-Project      = require path.resolve __dirname, '..', 'models', 'project'
-MergeRequest = require path.resolve __dirname, '..', 'models', 'merge-request'
-User         = require path.resolve __dirname, '..', 'models', 'user'
-Group        = require path.resolve __dirname, '..', 'models', 'group'
+AbstractEndpoint = require path.resolve __dirname, 'abstract-endpoint'
+getConfigs       = require path.resolve __dirname, 'get-configs'
+Project          = require path.resolve __dirname, '..', 'models', 'project'
+MergeRequest     = require path.resolve __dirname, '..', 'models', 'merge-request'
+User             = require path.resolve __dirname, '..', 'models', 'user'
+Group            = require path.resolve __dirname, '..', 'models', 'group'
 
-module.exports =
+module.exports = _.extend {}, AbstractEndpoint,
   #
   # generateRequestOptions - Returns the options for the request call.
   #
