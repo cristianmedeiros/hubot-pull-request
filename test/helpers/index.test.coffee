@@ -12,4 +12,4 @@ describe 'helpers', ->
       expect(helpers).to.not.have.key('index')
 
     it 'contains references to all other helpers', ->
-      expect(helpers).to.have.keys('checkConfigs', 'getConfigs', 'gitlab')
+      expect(helpers).to.have.keys('checkConfigs', 'getConfigs', 'gitlabEndpoint')
