@@ -27,16 +27,15 @@ module.exports = _.extend {}, AbstractEndpoint,
     unless config
       throw new Error("There is no configuration for gitlab ...")
 
-    options = {
+    options =
       url: "#{config.host}#{remotePath}",
       headers:
-        'PRIVATE-TOKEN': config.apiToken
-    }
+        'PRIVATE-TOKEN': config.api.token
 
-    if config.basicAuthUsername && config.basicAuthPassword
+    if config.basic
       options.auth =
-        user: config.basicAuthUsername,
-        pass: config.basicAuthPassword
+        user: config.basic.auth.username,
+        pass: config.basic.auth.password
 
     _.extend(options, otherOptions)
 
