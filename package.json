@@ -32,7 +32,8 @@
     "underscore.string": "~2.3.3",
     "request": "~2.34.0",
     "async": "~0.2.10",
-    "coffee-script": "~1.7.1"
+    "coffee-script": "~1.7.1",
+    "dottie": "~0.2.3"
   },
   "devDependencies": {
     "sinon": "~1.9.0",
