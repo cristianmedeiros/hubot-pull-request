@@ -8,7 +8,8 @@
     "test-cov": "node_modules/.bin/mocha test/**/*.test.coffee --compilers coffee:coffee-script/register --require blanket --reporter html-cov > tmp/coverage.html",
     "grep-cov": "cat tmp/coverage.html | egrep -o '<div class=\"percentage\">[^<]+' | egrep -o '\\d+' | head -n 1",
     "get-cov": "npm run test-cov && npm run grep-cov",
-    "watch": "fswatch . 'clear && npm test'"
+    "watch": "fswatch src:test 'clear && npm test'",
+    "watch-cov": "fswatch src:test 'clear && npm run get-cov'"
   },
   "repository": {
     "type": "git",
