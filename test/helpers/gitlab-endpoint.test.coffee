@@ -36,7 +36,6 @@ describe 'helpers', ->
     afterEach ->
       this.recoverApi()
 
-
     describe 'implemented methods', ->
       it 'implemented them all', ->
         Object.keys(gitlab).forEach (methodName) ->
