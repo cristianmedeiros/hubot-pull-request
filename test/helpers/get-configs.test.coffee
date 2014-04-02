@@ -16,13 +16,13 @@ describe 'helpers', ->
       expect(getConfigs()).to.eql({})
 
     it 'scopes the variables', ->
-      process.env.HUBOT_PULL_REQUEST_OM_NOM         = 1
-      process.env.HUBOT_PULL_REQUEST_OM_NOM_NOM     = 2
-      process.env.HUBOT_PULL_REQUEST_OM_NOM_NOM_NOM = 3
+      process.env.HUBOT_PULL_REQUEST_OM_NOM1 = 1
+      process.env.HUBOT_PULL_REQUEST_OM_NOM2 = 2
+      process.env.HUBOT_PULL_REQUEST_OM_NOM3 = 3
 
       expect(getConfigs()).to.eql(
         om:
-          nom: 1,
-          nomNom: 2,
-          nomNomNom: 3
+          nom1: 1,
+          nom2: 2,
+          nom3: 3
       )
