@@ -36,6 +36,14 @@ describe 'helpers', ->
     afterEach ->
       this.recoverApi()
 
+
+    describe 'implemented methods', ->
+      it 'implemented them all', ->
+        Object.keys(gitlab).forEach (methodName) ->
+          expect(->
+            gitlab[methodName]()
+          ).to.not.throwError(/is not implemented/)
+
     describe 'generateRequestOptions', ->
       describe 'without environment variables', ->
         it 'throws an error', ->
