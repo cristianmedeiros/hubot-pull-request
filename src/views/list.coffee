@@ -4,7 +4,7 @@ helpers = require path.resolve(__dirname, '..', 'helpers')
 
 module.exports =
   render: (scope, callback) ->
-    helpers.gitlab.readMergeRequests (err, result) ->
+    helpers.gitlabEndpoint.readMergeRequests (err, result) ->
       if err
         callback err, null
       else
