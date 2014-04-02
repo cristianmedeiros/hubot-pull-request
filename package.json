@@ -5,6 +5,9 @@
   "main": "index.coffee",
   "scripts": {
     "test": "node_modules/.bin/mocha test/**/*.test.coffee --compilers coffee:coffee-script/register",
+    "test-cov": "node_modules/.bin/mocha test/**/*.test.coffee --compilers coffee:coffee-script/register --require blanket --reporter html-cov > tmp/coverage.html",
+    "grep-cov": "cat tmp/coverage.html | egrep -o '<div class=\"percentage\">[^<]+' | egrep -o '\\d+' | head -n 1",
+    "get-cov": "npm run test-cov && npm run grep-cov",
     "watch": "fswatch . 'clear && npm test'"
   },
   "repository": {
@@ -32,6 +35,13 @@
   "devDependencies": {
     "sinon": "~1.9.0",
     "mocha": "~1.18.2",
-    "expect.js": "~0.3.1"
+    "expect.js": "~0.3.1",
+    "blanket": "~1.1.6"
+  },
+  "config": {
+    "blanket": {
+      "pattern": "src/helpers",
+      "loader": "./node-loaders/coffee-script"
+    }
   }
 }
