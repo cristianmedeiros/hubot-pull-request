@@ -5,9 +5,9 @@
   "main": "index.coffee",
   "scripts": {
     "test": "node_modules/.bin/mocha test/**/*.test.coffee --compilers coffee:coffee-script/register",
-    "test-coverage": "node_modules/.bin/mocha test/**/*.test.coffee --compilers coffee:coffee-script/register --require blanket --reporter html-cov > tmp/coverage.html",
-    "grep-coverage": "cat tmp/coverage.html | egrep -o '<div class=\"percentage\">[^<]+' | egrep -o '\\d+' | head -n 1",
-    "get-coverage": "npm run test-coverage && npm run grep-coverage",
+    "test-cov": "node_modules/.bin/mocha test/**/*.test.coffee --compilers coffee:coffee-script/register --require blanket --reporter html-cov > tmp/coverage.html",
+    "grep-cov": "cat tmp/coverage.html | egrep -o '<div class=\"percentage\">[^<]+' | egrep -o '\\d+' | head -n 1",
+    "get-cov": "npm run test-cov && npm run grep-cov",
     "watch": "fswatch . 'clear && npm test'"
   },
   "repository": {
