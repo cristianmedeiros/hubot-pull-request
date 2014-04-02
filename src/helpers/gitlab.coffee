@@ -91,7 +91,7 @@ module.exports =
   #
   readMergeRequestsFor: (project, callback) ->
     unless project instanceof Project
-      throw new Error('The passed argument is no Project.')
+      throw new Error('The passed argument is no instance of Project.')
 
     mergeRequests = []
     page          = 1
@@ -131,6 +131,9 @@ module.exports =
         callback err, null
 
   readMergeRequestViaPublicId: (project, publicId, callback) ->
+    unless project instanceof Project
+      throw new Error('The passed argument is no instance of Project.')
+
     @readMergeRequestsFor project, (err, mergeRequests) =>
       matchingRequests = mergeRequests.filter (mergeRequest) ->
         parseInt(mergeRequest.publicId, 10) == parseInt(publicId, 10)
@@ -225,7 +228,7 @@ module.exports =
 
   assignMergeRequestTo: (member, project, mergeRequest, callback) ->
     unless member instanceof User
-      throw new Error('The passed argument is no instance of Member.')
+      throw new Error('The passed argument is no instance of User.')
 
     unless project instanceof Project
       throw new Error('The passed argument is no instance of Project.')
