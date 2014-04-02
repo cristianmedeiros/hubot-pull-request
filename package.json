@@ -7,7 +7,7 @@
     "test": "node_modules/.bin/mocha test/**/*.test.coffee --compilers coffee:coffee-script/register",
     "test-coverage": "node_modules/.bin/mocha test/**/*.test.coffee --compilers coffee:coffee-script/register --require blanket --reporter html-cov > tmp/coverage.html",
     "grep-coverage": "cat tmp/coverage.html | egrep -o '<div class=\"percentage\">[^<]+' | egrep -o '\\d+' | head -n 1",
-    "generate-coverage": "npm run test-coverage && npm run grep-coverage",
+    "get-coverage": "npm run test-coverage && npm run grep-coverage",
     "watch": "fswatch . 'clear && npm test'"
   },
   "repository": {
