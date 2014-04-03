@@ -12,7 +12,6 @@ module.exports =
 
         unless _.contains [null, '', '*'], scope
           requests = requests.filter (request) ->
-            console.log(request.state, scope)
             _s.startsWith request.state.toLowerCase(), scope.toLowerCase()
 
         if requests.length == 0
