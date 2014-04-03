@@ -24,10 +24,9 @@ support = module.exports =
         }
 
   factories:
-    gitlab:
-      project: (options) ->
-        data = support.fixtures.gitlab.project(options)
-        new Project(
-          id: data.id, name: data.path_with_namespace,
-          ownerId: data.namespace.id, ownerType: null
-        )
+    project: (options) ->
+      data = support.fixtures.gitlab.project(options)
+      new Project(
+        id: data.id, name: data.path_with_namespace,
+        ownerId: data.namespace.id, ownerType: null
+      )
