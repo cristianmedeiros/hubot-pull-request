@@ -31,7 +31,7 @@ support = module.exports =
         }, options || {}
         result.iid ||= 10 + result.id
         result
-        
+
     github:
       project: (options) ->
         _.defaults options || {}, {
