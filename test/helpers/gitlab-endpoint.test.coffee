@@ -209,7 +209,6 @@ describe 'helpers', ->
 
         it "returns an array with one item", (done) ->
           gitlab.readMergeRequests (err, mergeRequests) =>
-            console.log(mergeRequests)
             expect(mergeRequests).to.be.an(Array)
             expect(mergeRequests).to.have.length(1)
             expect(support.toJSON(mergeRequests)).to.eql([{
@@ -232,7 +231,7 @@ describe 'helpers', ->
           gitlab.readMergeRequests (err, mergeRequests) ->
             expect(mergeRequests).to.be.an(Array)
             expect(mergeRequests).to.have.length(1)
-            
+
             expect(support.toJSON(mergeRequests)).to.eql([{
               id: 1,
               project: { id: 1, displayName: 'company/project-1', ownerId: 1, ownerType: null }
