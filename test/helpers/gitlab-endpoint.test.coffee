@@ -1,7 +1,10 @@
 expect       = require 'expect.js'
 path         = require 'path'
 sinon        = require 'sinon'
+_            = require 'lodash'
+_s           = require 'underscore.string'
 support      = require path.resolve __dirname, '..', 'support'
+abstract     = require path.resolve __dirname, '..', '..', 'src', 'helpers', 'abstract-endpoint'
 gitlab       = require path.resolve __dirname, '..', '..', 'src', 'helpers', 'gitlab-endpoint'
 Project      = require path.resolve __dirname, '..', '..', 'src', 'models', 'project'
 MergeRequest = require path.resolve __dirname, '..', '..', 'src', 'models', 'merge-request'
@@ -37,11 +40,18 @@ describe 'helpers', ->
       this.recoverApi()
 
     describe 'implemented methods', ->
-      Object.keys(gitlab).forEach (methodName) ->
+      Object.keys(abstract).forEach (methodName) ->
         it "implemented #{methodName}", ->
           expect(->
             gitlab[methodName]()
           ).to.not.throwError(/is not implemented/)
+
+      it "only reveils the public methods of the abstract endpoint", ->
+        publicAbstractMethodNames = Object.keys(abstract)
+
+        Object.keys(gitlab).forEach (methodName) ->
+          unless _.contains publicAbstractMethodNames, methodName
+            expect(_s.startsWith(methodName, '_')).to.be.ok()
 
     describe '_generateRequestOptions', ->
       describe 'without environment variables', ->
