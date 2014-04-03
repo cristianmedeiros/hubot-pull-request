@@ -62,7 +62,12 @@ module.exports = _.extend {}, AbstractEndpoint,
   readProjects: (callback) ->
     @callApi '/api/v3/projects', (err, projects) ->
       projects &&= projects.map (project) ->
-        new Project project
+        new Project(
+          id:        project.id
+          name:      project.path_with_namespace
+          ownerId:   project.namespace.id
+          ownerType: null
+        )
       callback err, projects
 
   #
