@@ -9,8 +9,7 @@ describe 'helpers', ->
       support.cleanUpEnvironment()
 
     [
-      'assignMergeRequest',
-      'readMergeRequests'
+      'assignMergeRequest'
     ].forEach (functionName) ->
       describe functionName, ->
         it "throws an error", ->

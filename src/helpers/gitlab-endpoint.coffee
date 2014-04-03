@@ -12,34 +12,6 @@ Group            = require path.resolve __dirname, '..', 'models', 'group'
 
 module.exports = _.extend {}, AbstractEndpoint,
   #
-  # readMergeRequests - Returns merge requests for all project.
-  #
-  # Parameters:
-  # - callback: A function that gets called, once the result is in place.
-  #
-  # Result:
-  # - An array of Objects with:
-  #   - project: Project
-  #   - requests: An array of merge requests
-  #
-  readMergeRequests: (callback) ->
-    @_readProjects (err, projects) =>
-      if err
-        callback(err, null)
-      else
-        async.map(
-          projects,
-          (project, callback) =>
-            @_readMergeRequestsFor project, (err, requests) ->
-              callback(err, requests)
-          (err, requests) ->
-            if err
-              callback err, null
-            else
-              callback null, _.flatten(requests)
-        )
-
-  #
   # assignMergeRequest - Assigns a merge request to a random project member.
   #
   # Parameters:
