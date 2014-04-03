@@ -23,6 +23,25 @@ support = module.exports =
             id: 1
         }
 
+      mergeRequest: (options) ->
+        result = _.extend {
+          id: 1
+          state: 'opened'
+          title: 'this merge request makes things better'
+        }, options || {}
+        result.iid ||= 10 + result.id
+        result
+        
+    github:
+      project: (options) ->
+        _.defaults options || {}, {
+          id: 1
+          full_name: 'company/project-1'
+          owner:
+            id: 1
+            type: 'User'
+        }
+
   factories:
     project: (options) ->
       data = support.fixtures.gitlab.project(options)
