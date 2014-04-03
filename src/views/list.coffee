@@ -1,4 +1,5 @@
 path    = require 'path'
+_       = require 'lodash'
 _s      = require 'underscore.string'
 
 module.exports =
@@ -9,22 +10,21 @@ module.exports =
       else
         answer = ""
 
-        if scope == '*'
-          scope = ''
-        else
-          scope ||= 'open'
-
         if scope != ''
           requests = requests.filter (request) ->
             _s.startsWith(request.state.toLowerCase(), scope.toLowerCase())
 
-        if requests.length > 0
-          projectName = requests[0].project.displayName
+        if requests.length == 0
+          callback null, "Nothing to do!"
+        else
+          groups = _.groupBy requests, (request) ->
+            request.project.displayName
 
-          answer += "\n\n#{projectName}"
-          answer += "\n#{[1..projectName.length].map(-> '-').join('')}"
+          Object.keys(groups).forEach (projectName) ->
+            answer += "\n\n#{projectName}"
+            answer += "\n#{[1..projectName.length].map(-> '-').join('')}"
 
-          requests.forEach (request) ->
-            answer += "\n#{request.condensed}"
+            _.sortBy(groups[projectName], 'publicId').forEach (request) ->
+              answer += "\n#{request.condensed}"
 
         callback null, "/quote #{answer.trim()}"

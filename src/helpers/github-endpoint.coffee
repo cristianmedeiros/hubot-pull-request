@@ -2,7 +2,7 @@ path    = require 'path'
 request = require 'request'
 _       = require 'lodash'
 async   = require 'async'
-Github  = require 'github'
+Github  = require 'octonode'
 
 AbstractEndpoint = require path.resolve __dirname, 'abstract-endpoint'
 getConfigs       = require path.resolve __dirname, 'get-configs'
@@ -13,6 +13,23 @@ Group            = require path.resolve __dirname, '..', 'models', 'group'
 
 GithubEndpoint = module.exports = _.extend {}, AbstractEndpoint,
   #
+  # readMergeRequestPageFor - Returns a page slice of merge requests for a project.
+  #
+  # Parameters:
+  # - project: A project, read via readProjects.
+  # - page: The page that you want to get.
+  # - callback: A function that gets called, once the result is in place.
+  #
+  _readMergeRequestPageFor: (project, page, callback) ->
+    unless project instanceof Project
+      throw new Error('The passed argument is no instance of Project.')
+
+    @github.repo(project.displayName).prs { page: page, per_page: 100 }, (err, requests) ->
+      requests &&= requests.map (request) ->
+        new MergeRequest request, project
+      callback err, requests
+
+  #
   # generateRequestOptions - Returns the options for the request call.
   #
   # Parameters:
@@ -21,7 +38,7 @@ GithubEndpoint = module.exports = _.extend {}, AbstractEndpoint,
   # Result:
   # - Object
   #
-  generateRequestOptions: (otherOptions={}) ->
+  _generateRequestOptions: (otherOptions={}) ->
     config  = getConfigs().github
 
     unless config
@@ -30,28 +47,73 @@ GithubEndpoint = module.exports = _.extend {}, AbstractEndpoint,
     options =
       version: "3.0.0"
 
-    console.log(config)
-
-    _.extend(options, config.github, otherOptions)
+    _.extend(options, config, otherOptions)
 
   #
-  # callApi - Calls the API and returns its data as a properly transformed object.
+  # readProjectsForScope - Return the projects of a certain scope. E.g. user or orgs.
   #
   # Parameters:
-  # - path: A path on the remote server.
-  # - callback: A function that gets called, once the server has responded.
+  # - url: The url for the scope.
+  # - callback: A function that gets called, once the result is in place.
   #
-  callApi: (path, callback, options={}) ->
-    func = ->
-      callback null, {}
-    setTimeout(func, 10)
+  _readProjectsForScope: (url, callback) ->
+    page     = 1
+    projects = []
+
+    if typeof url == 'function'
+      callback = url
+      url      = '/user/repos'
+
+    readPage = (page, _callback) =>
+      @github.get url, { page: page, per_page: 100 }, (err, status, projects, headers) ->
+        projects &&= projects.map (project) ->
+          new Project(
+            id:        project.id
+            name:      project.full_name
+            ownerId:   project.owner.id
+            ownerType: project.owner.type
+          )
+        _callback err, projects
+
+    iterator = (err, projectSlice) ->
+      if err
+        callback err, null
+      else if projectSlice.length == 0
+        callback null, projects
+      else
+        projects = projects.concat projectSlice
+        page     = page + 1
+        readPage page, iterator
+
+    readPage page, iterator
+
+  _readProjects: (callback) ->
+    @_readGroups (err, groups) =>
+      if err
+        callback err, null
+      else
+        urls = groups.map (group) -> "/orgs/#{group.name}/repos"
+        urls = urls.concat '/user/repos'
+
+        iterator = (url, callback) =>
+          @_readProjectsForScope url, callback
+
+        async.map urls, iterator, (err, projects) =>
+          if err
+            callback err, null
+          else
+            projects = _.flatten projects
+            projects = _.uniq projects, (project) -> project.id
+            callback null, projects
+
+  _readGroups: (callback) ->
+    @github.me().orgs (err, orgs) ->
+      if err
+        callback err, null
+      else
+        orgs = orgs.map (org) ->
+          new Group(id: org.id, name: org.login)
+        callback null, orgs
 
 Object.defineProperty GithubEndpoint, 'github', get: ->
-  options = @generateRequestOptions
-  auth    = options.auth
-  result  = new Github(_.omit(optios, 'auth'))
-
-  if auth
-    result.authenticate auth
-
-  result
+  @_github ||= Github.client(@_generateRequestOptions().auth)

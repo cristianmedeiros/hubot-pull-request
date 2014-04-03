@@ -19,11 +19,19 @@ view    = require path.resolve(__dirname, '..', 'views', 'list')
 helpers = require path.resolve(__dirname, '..', 'helpers')
 
 module.exports = (robot) ->
-  routeRegExp = /((m(erge-)?r(equest)?)|(p(ull-)?r(equest)?))\sl(ist)?/
+  routeRegExp = /((merge-request|mr)|(pull-request|pr))\sl(ist)?/
 
   robot.respond routeRegExp, (msg) ->
     scope    = msg.envelope.message.text.replace(/(^bender )/, "").replace(routeRegExp, "").trim()
-    endpoint = !!msg.envelope.message.text.match(/(p(ull-)?r(equest)?))\s/) ? helpers.githubEndpoint : helpers.gitlabEndpoint
+    endpoint = if !!msg.envelope.message.text.match(/(pull-request|pr)\s/)
+      helpers.githubEndpoint
+    else
+      helpers.gitlabEndpoint
+
+    if scope == '*'
+      scope = ''
+    else
+      scope ||= 'open'
 
     msg.reply "Searching for merge requests ..."
 
