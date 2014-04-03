@@ -10,19 +10,7 @@ describe 'helpers', ->
 
     [
       'assignMergeRequest',
-      'assignMergeRequestTo',
-      'readProjectMembers',
-      'readGroupMembers',
-      'readGroup',
-      'searchProject',
-      'readMergeRequests',
-      'readMergeRequestViaPublicId',
-      'readMergeRequest',
-      'readMergeRequestsFor',
-      'readMergeRequestPageFor',
-      'readProjects',
-      'callApi',
-      'generateRequestOptions'
+      'readMergeRequests'
     ].forEach (functionName) ->
       describe functionName, ->
         it "throws an error", ->
