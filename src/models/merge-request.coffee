@@ -1,9 +1,15 @@
+_ = require 'lodash'
+
 Function::property ||= (prop, desc) ->
   Object.defineProperty @prototype, prop, desc
 
 module.exports = class MergeRequest
-  constructor: (@data) ->
-  toJSON: -> @data
+  constructor: (data, project) ->
+    @data    = data
+    @project = project
+
+  toJSON: ->
+    _.extend @data, project: @project
 
   @property 'id', get: -> @data.id
   @property 'publicId', get: -> @data.iid

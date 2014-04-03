@@ -194,16 +194,17 @@ describe 'helpers', ->
       describe 'with one project', ->
         beforeEach ->
           @stubApiFor "/api/v3/projects", null, [ support.fixtures.gitlab.project() ]
-          @stubApiFor "/api/v3/projects/1/merge_requests?page=1", null, [{}]
+          @stubApiFor "/api/v3/projects/1/merge_requests?page=1", null, [{ id: 1 }]
           @stubApiFor "/api/v3/projects/1/merge_requests?page=2", null, []
 
         it "returns an array with one item", (done) ->
           gitlab.readMergeRequests (err, mergeRequests) =>
+            console.log(mergeRequests)
             expect(mergeRequests).to.be.an(Array)
             expect(mergeRequests).to.have.length(1)
             expect(support.toJSON(mergeRequests)).to.eql([{
-              project:  { id: 1, displayName: 'company/project-1', ownerId: 1, ownerType: null },
-              requests: [{}]
+              id: 1,
+              project: { id: 1, displayName: 'company/project-1', ownerId: 1, ownerType: null }
             }])
             done()
 
@@ -213,18 +214,18 @@ describe 'helpers', ->
             support.fixtures.gitlab.project(id: 1, path_with_namespace: 'company/project-1'),
             support.fixtures.gitlab.project(id: 2, path_with_namespace: 'company/project-2')
           ]
-          this.stubApiFor "/api/v3/projects/1/merge_requests?page=1", null, [{}]
+          this.stubApiFor "/api/v3/projects/1/merge_requests?page=1", null, [{ id: 1 }]
           this.stubApiFor "/api/v3/projects/1/merge_requests?page=2", null, []
           this.stubApiFor "/api/v3/projects/2/merge_requests?page=1", null, []
 
         it "returns an array with multiple items", (done) ->
           gitlab.readMergeRequests (err, mergeRequests) ->
+            expect(mergeRequests).to.be.an(Array)
+            expect(mergeRequests).to.have.length(1)
+            
             expect(support.toJSON(mergeRequests)).to.eql([{
-              project:  { id: 1, displayName: 'company/project-1', ownerId: 1, ownerType: null },
-              requests: [{}]
-            }, {
-              project:  { id: 2, displayName: 'company/project-2', ownerId: 1, ownerType: null },
-              requests: []
+              id: 1,
+              project: { id: 1, displayName: 'company/project-1', ownerId: 1, ownerType: null }
             }])
             done()
 

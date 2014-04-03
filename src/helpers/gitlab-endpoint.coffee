@@ -31,8 +31,12 @@ module.exports = _.extend {}, AbstractEndpoint,
           projects,
           (project, callback) =>
             @_readMergeRequestsFor project, (err, requests) ->
-              callback(err, { project: project, requests: requests })
-          callback
+              callback(err, requests)
+          (err, requests) ->
+            if err
+              callback err, null
+            else
+              callback null, _.flatten(requests)
         )
 
   #
@@ -149,36 +153,8 @@ module.exports = _.extend {}, AbstractEndpoint,
 
     @_callApi "/api/v3/projects/#{project.id}/merge_requests?page=#{page}", (err, requests) ->
       requests &&= requests.map (request) ->
-        new MergeRequest request
+        new MergeRequest(request, project)
       callback err, requests
-
-  #
-  # readMergeRequestsFor - Returns merge requests for a project.
-  #
-  # Parameters:
-  # - project: A project, read via readProjects.
-  # - callback: A function that gets called, once the result is in place.
-  #
-  _readMergeRequestsFor: (project, callback) ->
-    unless project instanceof Project
-      throw new Error('The passed argument is no instance of Project.')
-
-    mergeRequests = []
-    page          = 1
-
-    _callback = (err, requests) =>
-      if (err)
-        callback(err, null)
-      else if requests.length == 0
-        callback(null, mergeRequests)
-      else if page == 100
-        callback(new Error('Just iterated to page 100 ... Something is strange!'))
-      else
-        page += 1
-        mergeRequests = mergeRequests.concat requests
-        @_readMergeRequestPageFor project, page, _callback
-
-    @_readMergeRequestPageFor project, page, _callback
 
   #
   # readMergeRequest - Returns a specific merge request.
