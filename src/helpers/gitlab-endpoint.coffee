@@ -12,6 +12,71 @@ Group            = require path.resolve __dirname, '..', 'models', 'group'
 
 module.exports = _.extend {}, AbstractEndpoint,
   #
+  # readMergeRequests - Returns merge requests for all project.
+  #
+  # Parameters:
+  # - callback: A function that gets called, once the result is in place.
+  #
+  # Result:
+  # - An array of Objects with:
+  #   - project: Project
+  #   - requests: An array of merge requests
+  #
+  readMergeRequests: (callback) ->
+    @_readProjects (err, projects) =>
+      if err
+        callback(err, null)
+      else
+        async.map(
+          projects,
+          (project, callback) =>
+            @_readMergeRequestsFor project, (err, requests) ->
+              callback(err, { project: project, requests: requests })
+          callback
+        )
+
+  #
+  # assignMergeRequest - Assigns a merge request to a random project member.
+  #
+  # Parameters:
+  # - projectName: A needle that will be used for searching the relevant projects.
+  # - mergeRequestId: An ID of a merge request.
+  # - callback: A function that gets called, once the result is in place.
+  #
+  assignMergeRequest: (projectName, mergeRequestId, callback) ->
+    @_searchProject projectName, (err, project) =>
+      if err
+        callback err, null
+      else
+        @_readMergeRequestViaPublicId project, mergeRequestId, (err, mergeRequest) =>
+          if err
+            callback err, null
+          else if !mergeRequest.isOpen
+            callback new Error("The merge request is already #{mergeRequest.state}!"), null
+          else
+            @_readGroup project.ownerId, (err, group) =>
+              if err
+                callback err, null
+              else
+                @_readGroupMembers group, (err, groupMembers) =>
+                  if err
+                    callback err, null
+                  else
+                    @_readProjectMembers project, (err, projectMembers) =>
+                      if err
+                        callback err, null
+                      else
+                        members = groupMembers.concat projectMembers
+                        members = _.uniq members, (user) -> user.id
+                        member  = _.sample(members)
+
+                        @_assignMergeRequestTo member, project, mergeRequest, (err, mergeRequest) =>
+                          if err
+                            callback err, null
+                          else
+                            callback null, mergeRequest
+
+  #
   # generateRequestOptions - Returns the options for the request call.
   #
   # Parameters:
@@ -21,7 +86,7 @@ module.exports = _.extend {}, AbstractEndpoint,
   # Result:
   # - Object
   #
-  generateRequestOptions: (remotePath, otherOptions={}) ->
+  _generateRequestOptions: (remotePath, otherOptions={}) ->
     config  = getConfigs().gitlab
 
     unless config
@@ -46,8 +111,8 @@ module.exports = _.extend {}, AbstractEndpoint,
   # - path: A path on the remote server.
   # - callback: A function that gets called, once the server has responded.
   #
-  callApi: (path, callback, options={}) ->
-    request @generateRequestOptions(path, options), (err, response, body) ->
+  _callApi: (path, callback, options={}) ->
+    request @_generateRequestOptions(path, options), (err, response, body) ->
       if err
         callback(err, null)
       else
@@ -59,8 +124,8 @@ module.exports = _.extend {}, AbstractEndpoint,
   # Parameters:
   # - callback: A function that gets called, once the result is in place.
   #
-  readProjects: (callback) ->
-    @callApi '/api/v3/projects', (err, projects) ->
+  _readProjects: (callback) ->
+    @_callApi '/api/v3/projects', (err, projects) ->
       projects &&= projects.map (project) ->
         new Project(
           id:        project.id
@@ -78,11 +143,11 @@ module.exports = _.extend {}, AbstractEndpoint,
   # - page: The page that you want to get.
   # - callback: A function that gets called, once the result is in place.
   #
-  readMergeRequestPageFor: (project, page, callback) ->
+  _readMergeRequestPageFor: (project, page, callback) ->
     unless project instanceof Project
       throw new Error('The passed argument is no instance of Project.')
 
-    @callApi "/api/v3/projects/#{project.id}/merge_requests?page=#{page}", (err, requests) ->
+    @_callApi "/api/v3/projects/#{project.id}/merge_requests?page=#{page}", (err, requests) ->
       requests &&= requests.map (request) ->
         new MergeRequest request
       callback err, requests
@@ -94,15 +159,14 @@ module.exports = _.extend {}, AbstractEndpoint,
   # - project: A project, read via readProjects.
   # - callback: A function that gets called, once the result is in place.
   #
-  readMergeRequestsFor: (project, callback) ->
+  _readMergeRequestsFor: (project, callback) ->
     unless project instanceof Project
       throw new Error('The passed argument is no instance of Project.')
 
     mergeRequests = []
     page          = 1
-    self          = this
 
-    _callback = (err, requests) ->
+    _callback = (err, requests) =>
       if (err)
         callback(err, null)
       else if requests.length == 0
@@ -112,9 +176,9 @@ module.exports = _.extend {}, AbstractEndpoint,
       else
         page += 1
         mergeRequests = mergeRequests.concat requests
-        self.readMergeRequestPageFor project, page, _callback
+        @_readMergeRequestPageFor project, page, _callback
 
-    @readMergeRequestPageFor project, page, _callback
+    @_readMergeRequestPageFor project, page, _callback
 
   #
   # readMergeRequest - Returns a specific merge request.
@@ -124,22 +188,22 @@ module.exports = _.extend {}, AbstractEndpoint,
   # - id: An id of a merge request
   # - callback: A function that gets called, once the result is in place.
   #
-  readMergeRequest: (project, id, callback) ->
+  _readMergeRequest: (project, id, callback) ->
     unless project instanceof Project
       throw new Error('The passed argument is no instance of Project.')
 
-    @callApi "/api/v3/projects/#{project.id}/merge_request/#{id}", (err, request) ->
+    @_callApi "/api/v3/projects/#{project.id}/merge_request/#{id}", (err, request) ->
       if request &&= new MergeRequest(request)
         callback null, request
       else
         err ||= new Error("Unable to find merge request ##{id} for project '#{project.displayName}'.")
         callback err, null
 
-  readMergeRequestViaPublicId: (project, publicId, callback) ->
+  _readMergeRequestViaPublicId: (project, publicId, callback) ->
     unless project instanceof Project
       throw new Error('The passed argument is no instance of Project.')
 
-    @readMergeRequestsFor project, (err, mergeRequests) =>
+    @_readMergeRequestsFor project, (err, mergeRequests) =>
       matchingRequests = mergeRequests.filter (mergeRequest) ->
         parseInt(mergeRequest.publicId, 10) == parseInt(publicId, 10)
 
@@ -154,38 +218,14 @@ module.exports = _.extend {}, AbstractEndpoint,
         callback null, matchingRequests[0]
 
   #
-  # readMergeRequests - Returns merge requests for all project.
-  #
-  # Parameters:
-  # - callback: A function that gets called, once the result is in place.
-  #
-  # Result:
-  # - An array of Objects with:
-  #   - project: Project
-  #   - requests: An array of merge requests
-  #
-  readMergeRequests: (callback) ->
-    @readProjects (err, projects) =>
-      if err
-        callback(err, null)
-      else
-        async.map(
-          projects,
-          (project, callback) =>
-            @readMergeRequestsFor project, (err, requests) ->
-              callback(err, { project: project, requests: requests })
-          callback
-        )
-
-  #
   # searchProject - Returns a project that matches the passed needle.
   #
   # Parameters:
   # - needle: A string that gets searched for in the project names.
   # - callback: A function that gets called, once the result is in place.
   #
-  searchProject: (needle, callback) ->
-    @readProjects (err, projects) =>
+  _searchProject: (needle, callback) ->
+    @_readProjects (err, projects) =>
       if err
         callback(err, null)
       else
@@ -199,30 +239,30 @@ module.exports = _.extend {}, AbstractEndpoint,
         else
           callback null, projects[0]
 
-  readGroup: (groupId, callback) ->
-    @callApi "/api/v3/groups/#{groupId}", (err, group) ->
-      if group &&= new Group(group)
+  _readGroup: (groupId, callback) ->
+    @_callApi "/api/v3/groups/#{groupId}", (err, group) ->
+      if group &&= new Group(id: group.id)
         callback null, group
       else
         err ||= new Error('No group found')
         callback err, null
 
-  readGroupMembers: (group, callback) ->
+  _readGroupMembers: (group, callback) ->
     unless group instanceof Group
       throw new Error('The passed argument is no instance of Group.')
 
-    @callApi "/api/v3/groups/#{group.id}/members", (err, members) ->
+    @_callApi "/api/v3/groups/#{group.id}/members", (err, members) ->
       if err
         callback err, null
       else
         members &&= members.map (member) -> new User(member)
         callback null, members
 
-  readProjectMembers: (project, callback) ->
+  _readProjectMembers: (project, callback) ->
     unless project instanceof Project
       throw new Error('The passed argument is no instance of Project.')
 
-    @callApi "/api/v3/projects/#{project.id}/members", (err, members) ->
+    @_callApi "/api/v3/projects/#{project.id}/members", (err, members) ->
       if err
         callback err, null
       else if members.length == 0
@@ -231,7 +271,7 @@ module.exports = _.extend {}, AbstractEndpoint,
         members &&= members.map (member) -> new User(member)
         callback null, members
 
-  assignMergeRequestTo: (member, project, mergeRequest, callback) ->
+  _assignMergeRequestTo: (member, project, mergeRequest, callback) ->
     unless member instanceof User
       throw new Error('The passed argument is no instance of User.')
 
@@ -249,45 +289,4 @@ module.exports = _.extend {}, AbstractEndpoint,
         mergeRequest &&= new MergeRequest(mergeRequest)
         callback null, mergeRequest
 
-    @callApi url, _callback, method: 'PUT'
-
-  #
-  # assignMergeRequest - Assigns a merge request to a random project member.
-  #
-  # Parameters:
-  # - projectName: A needle that will be used for searching the relevant projects.
-  # - mergeRequestId: An ID of a merge request.
-  # - callback: A function that gets called, once the result is in place.
-  #
-  assignMergeRequest: (projectName, mergeRequestId, callback) ->
-    @searchProject projectName, (err, project) =>
-      if err
-        callback err, null
-      else
-        @readMergeRequestViaPublicId project, mergeRequestId, (err, mergeRequest) =>
-          if err
-            callback err, null
-          else if !mergeRequest.isOpen
-            callback new Error("The merge request is already #{mergeRequest.state}!"), null
-          else
-            @readGroup project.ownerId, (err, group) =>
-              if err
-                callback err, null
-              else
-                @readGroupMembers group, (err, groupMembers) =>
-                  if err
-                    callback err, null
-                  else
-                    @readProjectMembers project, (err, projectMembers) =>
-                      if err
-                        callback err, null
-                      else
-                        members = groupMembers.concat projectMembers
-                        members = _.uniq members, (user) -> user.id
-                        member  = _.sample(members)
-
-                        @assignMergeRequestTo member, project, mergeRequest, (err, mergeRequest) =>
-                          if err
-                            callback err, null
-                          else
-                            callback null, mergeRequest
+    @_callApi url, _callback, method: 'PUT'
