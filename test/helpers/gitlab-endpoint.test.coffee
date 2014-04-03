@@ -87,6 +87,21 @@ describe 'helpers', ->
           expect(stub.firstCall.args[0]).to.equal('/api/v3/projects')
           done()
 
+      it 'transforms the data into a proper Project instance', (done) ->
+        @project = support.fixtures.gitlab.project()
+        @stubApiFor "/api/v3/projects", null, [ @project ]
+
+        gitlab.readProjects (err, projects) =>
+          expect(projects).to.be.an(Array)
+          expect(projects).to.have.length(1)
+          expect(projects[0]).to.eql(
+            displayName: 'company/project-1'
+            id:          1
+            ownerId:     1
+            ownerType:   null
+          )
+          done()
+
     describe 'readMergeRequestPageFor', ->
       it 'throws an error if no instance of Project is passed', ->
         expect(->
@@ -178,23 +193,26 @@ describe 'helpers', ->
 
       describe 'with one project', ->
         beforeEach ->
-          this.stubApiFor "/api/v3/projects", null, [id: 1]
-          this.stubApiFor "/api/v3/projects/1/merge_requests?page=1", null, [{}]
-          this.stubApiFor "/api/v3/projects/1/merge_requests?page=2", null, []
+          @stubApiFor "/api/v3/projects", null, [ support.fixtures.gitlab.project() ]
+          @stubApiFor "/api/v3/projects/1/merge_requests?page=1", null, [{}]
+          @stubApiFor "/api/v3/projects/1/merge_requests?page=2", null, []
 
         it "returns an array with one item", (done) ->
-          gitlab.readMergeRequests (err, mergeRequests) ->
+          gitlab.readMergeRequests (err, mergeRequests) =>
             expect(mergeRequests).to.be.an(Array)
             expect(mergeRequests).to.have.length(1)
             expect(support.toJSON(mergeRequests)).to.eql([{
-              project:  { id: 1 },
+              project:  { id: 1, displayName: 'company/project-1', ownerId: 1, ownerType: null },
               requests: [{}]
             }])
             done()
 
       describe 'with multiple projects', ->
         beforeEach ->
-          this.stubApiFor "/api/v3/projects", null, [{id: 1}, {id: 2}]
+          this.stubApiFor "/api/v3/projects", null, [
+            support.fixtures.gitlab.project(id: 1, path_with_namespace: 'company/project-1'),
+            support.fixtures.gitlab.project(id: 2, path_with_namespace: 'company/project-2')
+          ]
           this.stubApiFor "/api/v3/projects/1/merge_requests?page=1", null, [{}]
           this.stubApiFor "/api/v3/projects/1/merge_requests?page=2", null, []
           this.stubApiFor "/api/v3/projects/2/merge_requests?page=1", null, []
@@ -202,10 +220,10 @@ describe 'helpers', ->
         it "returns an array with multiple items", (done) ->
           gitlab.readMergeRequests (err, mergeRequests) ->
             expect(support.toJSON(mergeRequests)).to.eql([{
-              project:  { id: 1 },
+              project:  { id: 1, displayName: 'company/project-1', ownerId: 1, ownerType: null },
               requests: [{}]
             }, {
-              project:  { id: 2 },
+              project:  { id: 2, displayName: 'company/project-2', ownerId: 1, ownerType: null },
               requests: []
             }])
             done()
@@ -244,8 +262,8 @@ describe 'helpers', ->
     describe 'searchProject', ->
       beforeEach ->
         this.stubApiFor "/api/v3/projects", null, [
-          {id: 1, path_with_namespace: 'company/project-1'},
-          {id: 2, path_with_namespace: 'company/project-2'}
+          support.fixtures.gitlab.project(id: 1, path_with_namespace: 'company/project-1'),
+          support.fixtures.gitlab.project(id: 2, path_with_namespace: 'company/project-2')
         ]
 
       it 'propagates api errors', (done) ->
@@ -393,7 +411,7 @@ describe 'helpers', ->
         this.stubApiFor "/api/v3/projects/1/merge_requests?page=1", null, [{ iid: 11, id: 1}]
         this.stubApiFor "/api/v3/projects/1/merge_requests?page=2", null, []
 
-        project = new Project(id: 1, path_with_namespace: 'company/project-1')
+        project = support.factories.gitlab.project()
 
         gitlab.readMergeRequestViaPublicId project, 12, (err, mergeRequest) ->
           expect(err).to.be.an(Error)
@@ -404,7 +422,7 @@ describe 'helpers', ->
         this.stubApiFor "/api/v3/projects/1/merge_requests?page=1", null, [{ iid: 11, id: 1}, { iid: 11, id: 2}]
         this.stubApiFor "/api/v3/projects/1/merge_requests?page=2", null, []
 
-        project = new Project(id: 1, path_with_namespace: 'company/project-1')
+        project = support.factories.gitlab.project()
 
         gitlab.readMergeRequestViaPublicId project, 11, (err, mergeRequest) ->
           expect(err).to.be.an(Error)
@@ -443,7 +461,7 @@ describe 'helpers', ->
     describe 'assignMergeRequestTo', ->
       beforeEach ->
         @member       = new User(id: 1)
-        @project      = new Project(id: 1)
+        @project      = support.factories.gitlab.project()
         @mergeRequest = new MergeRequest(id: 1)
         @stubApiFor "/api/v3/projects/#{@project.id}/merge_request/#{@mergeRequest.id}?assignee_id=#{@member.id}", 'foo', null
 

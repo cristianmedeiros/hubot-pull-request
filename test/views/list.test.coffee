@@ -9,8 +9,8 @@ describe 'views', ->
       support.cleanUpEnvironment()
 
       this.stubApiFor "/api/v3/projects", null, [
-        {id: 1, path_with_namespace: 'company/project1'},
-        {id: 2, path_with_namespace: 'company/project2'}
+        support.fixtures.gitlab.project(id: 1, path_with_namespace: 'company/project1'),
+        support.fixtures.gitlab.project(id: 2, path_with_namespace: 'company/project2')
       ]
       this.stubApiFor "/api/v3/projects/1/merge_requests?page=1", null, [
         { id: 1, iid: 11, state: 'merged', title: 'omg this is urgent' },
