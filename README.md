@@ -36,6 +36,8 @@ The following configurations are available:
 * `HUBOT_PULL_REQUEST_GITLAB_BASIC_AUTH_USERNAME` - The username of the basic auth.
 * `HUBOT_PULL_REQUEST_GITLAB_BASIC_AUTH_PASSWORD` - The password of the basic auth.
 * `HUBOT_PULL_REQUEST_GITLAB_API_TOKEN`           - The api token of a gitlab user.
+* `HUBOT_PULL_REQUEST_GITHUB_AUTH_USERNAME`       - The username of a github user.
+* `HUBOT_PULL_REQUEST_GITHUB_AUTH_PASSWORD`       - The password of a github user.
 
 ## Running the tests
 
