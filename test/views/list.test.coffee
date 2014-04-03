@@ -2,6 +2,7 @@ expect  = require 'expect.js'
 path    = require 'path'
 support = require path.resolve(__dirname, '..', 'support')
 view    = require path.resolve(__dirname, '..', '..', 'src', 'views', 'list')
+helpers = require path.resolve(__dirname, '..', '..', 'src', 'helpers')
 
 describe 'views', ->
   describe 'merge-request-list', ->
@@ -21,21 +22,21 @@ describe 'views', ->
 
     describe "without a specific scope", ->
       it 'returns only the open merge requests', (done) ->
-        view.render null, (err, content) ->
+        view.render helpers.gitlabEndpoint, null, (err, content) ->
           expect(err).to.be(null)
           expect(content).to.equal('/quote company/project1\n----------------\n12 » opened » unassigned » fixed type')
           done()
 
     describe "with 'merged' scope", ->
       it 'returns only the merged merge requests', (done) ->
-        view.render 'merged', (err, content) ->
+        view.render helpers.gitlabEndpoint, 'merged', (err, content) ->
           expect(err).to.be(null)
           expect(content).to.equal('/quote company/project1\n----------------\n11 » merged » unassigned » omg this is urgent')
           done()
 
     describe "with '*' scope", ->
       it 'returns all merge requests', (done) ->
-        view.render '*', (err, content) ->
+        view.render helpers.gitlabEndpoint, '*', (err, content) ->
           expect(err).to.be(null)
           expect(content).to.equal('/quote company/project1\n----------------\n11 » merged » unassigned » omg this is urgent\n12 » opened » unassigned » fixed type')
           done()

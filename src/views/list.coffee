@@ -1,10 +1,9 @@
 path    = require 'path'
 _s      = require 'underscore.string'
-helpers = require path.resolve(__dirname, '..', 'helpers')
 
 module.exports =
-  render: (scope, callback) ->
-    helpers.gitlabEndpoint.readMergeRequests (err, requests) ->
+  render: (endpoint, scope, callback) ->
+    endpoint.readMergeRequests (err, requests) ->
       if err
         callback err, null
       else
