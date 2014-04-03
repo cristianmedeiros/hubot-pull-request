@@ -10,9 +10,10 @@ module.exports =
       else
         answer = ""
 
-        if scope != ''
+        unless _.contains [null, '', '*'], scope
           requests = requests.filter (request) ->
-            _s.startsWith(request.state.toLowerCase(), scope.toLowerCase())
+            console.log(request.state, scope)
+            _s.startsWith request.state.toLowerCase(), scope.toLowerCase()
 
         if requests.length == 0
           callback null, "Nothing to do!"
