@@ -34,7 +34,8 @@
     "async": "~0.2.10",
     "coffee-script": "~1.7.1",
     "dottie": "~0.2.3",
-    "github": "~0.1.15"
+    "github": "~0.1.15",
+    "octonode": "~0.6.1"
   },
   "devDependencies": {
     "sinon": "~1.9.0",
