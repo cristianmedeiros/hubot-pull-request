@@ -4,7 +4,20 @@ A hubot script that handles merge requests (Gitlab) and pull requests (Github).
 
 ## Tiny note
 
-- Github is not yet supported.
+- Github is not yet fully supported.
+
+## Features
+
+- List all merge requests from a Gitlab server.
+- List all pull requests from Github.
+- Assign merge request to random developers of a Gitlab group.
+
+## Triggers
+
+- `hubot merge-request list <scope>`
+- `hubot merge-request assign <project-identifier> <merge-request-identifier>`
+- `hubot pull-request list`
+
 
 ## Installation
 
@@ -40,6 +53,42 @@ The following configurations are available:
 * `HUBOT_PULL_REQUEST_GITLAB_API_TOKEN`           - The api token of a gitlab user.
 * `HUBOT_PULL_REQUEST_GITHUB_AUTH_USERNAME`       - The username of a github user.
 * `HUBOT_PULL_REQUEST_GITHUB_AUTH_PASSWORD`       - The password of a github user.
+
+## Look'n'Feel
+
+### Reading merge requests:
+
+```
+sdepold:
+hubot merge-request list
+
+hubot:
+@sdepold Searching for merge requests ...
+
+hubot:
+group/project-1
+---------------
+54 » opened » unassigned » Something awesome
+65 » opened » sdepold » Pretty important change
+82 » opened » someone » API extension
+
+group/project-2
+---------------
+2 » opened » unassigned » Fix for ticket #1234
+```
+
+### Assigning merge requests:
+
+```
+sdepold:
+hubot merge-request assign group/project-1 54
+
+hubot:
+@sdepold Assigning merge request #54 of group/project-1 ...
+
+hubot:
+Successfully assigned the merge request 'Something awesome' to mr-super-duper.
+```
 
 ## Running the tests
 
