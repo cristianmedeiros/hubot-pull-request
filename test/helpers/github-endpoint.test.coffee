@@ -61,7 +61,7 @@ describe 'helpers', ->
     afterEach ->
       this.recoverApi()
 
-    support.ensureEndpointImplementation.call this, abstract, github
+    # support.ensureEndpointImplementation.call this, abstract, github
 
     describe '_generateRequestOptions', ->
       describe 'without environment variables', ->
