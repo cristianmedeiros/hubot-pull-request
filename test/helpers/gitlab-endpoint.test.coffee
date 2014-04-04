@@ -1,7 +1,10 @@
 expect       = require 'expect.js'
 path         = require 'path'
 sinon        = require 'sinon'
+_            = require 'lodash'
+_s           = require 'underscore.string'
 support      = require path.resolve __dirname, '..', 'support'
+abstract     = require path.resolve __dirname, '..', '..', 'src', 'helpers', 'abstract-endpoint'
 gitlab       = require path.resolve __dirname, '..', '..', 'src', 'helpers', 'gitlab-endpoint'
 Project      = require path.resolve __dirname, '..', '..', 'src', 'models', 'project'
 MergeRequest = require path.resolve __dirname, '..', '..', 'src', 'models', 'merge-request'
@@ -17,10 +20,10 @@ describe 'helpers', ->
         if !!this.stub
           this.stub = undefined
           this.apiStubs = undefined
-          gitlab.callApi.restore()
+          gitlab._callApi.restore()
 
       this.stubApi = (err, result) =>
-        this.stub ||= sinon.stub gitlab, 'callApi', (path, callback) =>
+        this.stub ||= sinon.stub gitlab, '_callApi', (path, callback) =>
           if (this.apiStubs || {})[path]
             setTimeout((=>
               callback(this.apiStubs[path].error, this.apiStubs[path].result)
@@ -36,11 +39,13 @@ describe 'helpers', ->
     afterEach ->
       this.recoverApi()
 
-    describe 'generateRequestOptions', ->
+    support.ensureEndpointImplementation.call this, abstract, gitlab
+
+    describe '_generateRequestOptions', ->
       describe 'without environment variables', ->
         it 'throws an error', ->
           expect(->
-            gitlab.generateRequestOptions '/api/v3/projects'
+            gitlab._generateRequestOptions '/api/v3/projects'
           ).to.throwError(/no configuration for gitlab/)
 
       describe 'with gitlab host and api key', ->
@@ -48,7 +53,7 @@ describe 'helpers', ->
           process.env.HUBOT_PULL_REQUEST_GITLAB_HOST = 'http://localhost:1234'
           process.env.HUBOT_PULL_REQUEST_GITLAB_API_TOKEN = '123456789'
 
-          @requestOptions = gitlab.generateRequestOptions '/api/v3/projects'
+          @requestOptions = gitlab._generateRequestOptions '/api/v3/projects'
 
         it 'returns the correct url', ->
           expect(@requestOptions.url).to.equal('http://localhost:1234/api/v3/projects')
@@ -64,7 +69,7 @@ describe 'helpers', ->
           process.env.HUBOT_PULL_REQUEST_GITLAB_BASIC_AUTH_USERNAME = 'user'
           process.env.HUBOT_PULL_REQUEST_GITLAB_BASIC_AUTH_PASSWORD = 'pass'
 
-          @requestOptions = gitlab.generateRequestOptions '/api/v3/projects'
+          @requestOptions = gitlab._generateRequestOptions '/api/v3/projects'
 
         it 'returns the correct basic auth options', ->
           expect(@requestOptions.auth).to.eql(
@@ -72,25 +77,40 @@ describe 'helpers', ->
             pass: 'pass'
           )
 
-    describe 'readProjects', ->
+    describe '_readProjects', ->
       it 'reads the projects from the API', (done) ->
         stub = this.stubApi null, []
 
-        gitlab.readProjects ->
+        gitlab._readProjects ->
           expect(stub.firstCall.args[0]).to.equal('/api/v3/projects')
           done()
 
-    describe 'readMergeRequestPageFor', ->
+      it 'transforms the data into a proper Project instance', (done) ->
+        @project = support.fixtures.gitlab.project()
+        @stubApiFor "/api/v3/projects", null, [ @project ]
+
+        gitlab._readProjects (err, projects) =>
+          expect(projects).to.be.an(Array)
+          expect(projects).to.have.length(1)
+          expect(projects[0]).to.eql(
+            displayName: 'company/project-1'
+            id:          1
+            ownerId:     1
+            ownerType:   null
+          )
+          done()
+
+    describe '_readMergeRequestPageFor', ->
       it 'throws an error if no instance of Project is passed', ->
         expect(->
-          gitlab.readMergeRequestPageFor id: 1, 1, ->
+          gitlab._readMergeRequestPageFor id: 1, 1, ->
         ).to.throwError(/no instance of Project/)
 
       it 'reads the merge requests for the correct project and the correct page', (done) ->
         stub    = this.stubApi null, []
         project = new Project id: 2
 
-        gitlab.readMergeRequestPageFor project, 3, ->
+        gitlab._readMergeRequestPageFor project, 3, ->
           expect(stub.firstCall.args[0]).to.equal('/api/v3/projects/2/merge_requests?page=3')
           done()
 
@@ -99,23 +119,23 @@ describe 'helpers', ->
 
         project = new Project id: 1
 
-        gitlab.readMergeRequestPageFor project, 1, (err, mergeRequests) ->
+        gitlab._readMergeRequestPageFor project, 1, (err, mergeRequests) ->
           expect(mergeRequests).to.have.length(3)
           mergeRequests.forEach (mergeRequest) ->
             expect(mergeRequest).to.be.a(MergeRequest)
           done()
 
-    describe 'readMergeRequestsFor', ->
+    describe '_readMergeRequestsFor', ->
       it 'throws an error if the passed object is no project', ->
         expect(->
-          gitlab.readMergeRequestsFor id: 1
+          gitlab._readMergeRequestsFor id: 1
         ).to.throwError(/no instance of Project/)
 
       it 'propagates an error if one occurred', (done) ->
         stub    = this.stubApi new Error('omnom'), null
         project = new Project id: 1
 
-        gitlab.readMergeRequestsFor project, (err, result) ->
+        gitlab._readMergeRequestsFor project, (err, result) ->
           expect(err).to.be.an(Error)
           done()
 
@@ -126,7 +146,7 @@ describe 'helpers', ->
 
         project = new Project id: 1
 
-        gitlab.readMergeRequestsFor project, (err, result) ->
+        gitlab._readMergeRequestsFor project, (err, result) ->
           expect(err).to.be(null)
           expect(result).to.have.length(4)
           done()
@@ -137,7 +157,7 @@ describe 'helpers', ->
 
         project = new Project id: 1
 
-        gitlab.readMergeRequestsFor project, (err, result) ->
+        gitlab._readMergeRequestsFor project, (err, result) ->
           expect(err).to.be.an(Error)
           done()
 
@@ -146,7 +166,7 @@ describe 'helpers', ->
 
         project = new Project id: 1
 
-        gitlab.readMergeRequestsFor project, (err, result) ->
+        gitlab._readMergeRequestsFor project, (err, result) ->
           expect(err).to.be(null)
           expect(result).to.have.length(0)
           done()
@@ -171,39 +191,42 @@ describe 'helpers', ->
 
       describe 'with one project', ->
         beforeEach ->
-          this.stubApiFor "/api/v3/projects", null, [id: 1]
-          this.stubApiFor "/api/v3/projects/1/merge_requests?page=1", null, [{}]
-          this.stubApiFor "/api/v3/projects/1/merge_requests?page=2", null, []
+          @stubApiFor "/api/v3/projects", null, [ support.fixtures.gitlab.project() ]
+          @stubApiFor "/api/v3/projects/1/merge_requests?page=1", null, [{ id: 1 }]
+          @stubApiFor "/api/v3/projects/1/merge_requests?page=2", null, []
 
         it "returns an array with one item", (done) ->
-          gitlab.readMergeRequests (err, mergeRequests) ->
+          gitlab.readMergeRequests (err, mergeRequests) =>
             expect(mergeRequests).to.be.an(Array)
             expect(mergeRequests).to.have.length(1)
             expect(support.toJSON(mergeRequests)).to.eql([{
-              project:  { id: 1 },
-              requests: [{}]
+              id: 1,
+              project: { id: 1, displayName: 'company/project-1', ownerId: 1, ownerType: null }
             }])
             done()
 
       describe 'with multiple projects', ->
         beforeEach ->
-          this.stubApiFor "/api/v3/projects", null, [{id: 1}, {id: 2}]
-          this.stubApiFor "/api/v3/projects/1/merge_requests?page=1", null, [{}]
+          this.stubApiFor "/api/v3/projects", null, [
+            support.fixtures.gitlab.project(id: 1, path_with_namespace: 'company/project-1'),
+            support.fixtures.gitlab.project(id: 2, path_with_namespace: 'company/project-2')
+          ]
+          this.stubApiFor "/api/v3/projects/1/merge_requests?page=1", null, [{ id: 1 }]
           this.stubApiFor "/api/v3/projects/1/merge_requests?page=2", null, []
           this.stubApiFor "/api/v3/projects/2/merge_requests?page=1", null, []
 
         it "returns an array with multiple items", (done) ->
           gitlab.readMergeRequests (err, mergeRequests) ->
+            expect(mergeRequests).to.be.an(Array)
+            expect(mergeRequests).to.have.length(1)
+
             expect(support.toJSON(mergeRequests)).to.eql([{
-              project:  { id: 1 },
-              requests: [{}]
-            }, {
-              project:  { id: 2 },
-              requests: []
+              id: 1,
+              project: { id: 1, displayName: 'company/project-1', ownerId: 1, ownerType: null }
             }])
             done()
 
-    describe 'readMergeRequest', ->
+    describe '_readMergeRequest', ->
       beforeEach ->
         this.stubApiFor "/api/v3/projects/1/merge_request/1", null, {
           id: 1,
@@ -214,68 +237,68 @@ describe 'helpers', ->
 
       it 'throws an error if the passed object is no project', ->
         expect(->
-          gitlab.readMergeRequest id: 1
+          gitlab._readMergeRequest id: 1
         ).to.throwError(/no instance of Project/)
 
       it 'returns the merge request if available', (done) ->
         project = new Project(id: 1)
 
-        gitlab.readMergeRequest project, 1, (err, mergeRequest) ->
+        gitlab._readMergeRequest project, 1, (err, mergeRequest) ->
           expect(err).to.be(null)
           expect(mergeRequest).to.be.a(MergeRequest)
           expect(mergeRequest.id).to.equal(1)
           done()
 
       it 'returns an error if no merge request was available', (done) ->
-        project = new Project(id: 1)
+        project = support.factories.project()
 
-        gitlab.readMergeRequest project, 2, (err, mergeRequest) ->
+        gitlab._readMergeRequest project, 2, (err, mergeRequest) ->
           expect(err).to.be.an(Error)
           expect(err).to.match(/Unable to find merge request #2/)
           done()
 
-    describe 'searchProject', ->
+    describe '_searchProject', ->
       beforeEach ->
         this.stubApiFor "/api/v3/projects", null, [
-          {id: 1, path_with_namespace: 'company/project-1'},
-          {id: 2, path_with_namespace: 'company/project-2'}
+          support.fixtures.gitlab.project(id: 1, path_with_namespace: 'company/project-1'),
+          support.fixtures.gitlab.project(id: 2, path_with_namespace: 'company/project-2')
         ]
 
       it 'propagates api errors', (done) ->
         this.stubApiFor "/api/v3/projects", 'wtf', null
 
-        gitlab.searchProject 'omnom', (err, projects) ->
+        gitlab._searchProject 'omnom', (err, projects) ->
           expect(err).to.match(/wtf/)
           done()
 
       it 'throws an error if no projects are matching', (done) ->
-        gitlab.searchProject 'company/project-3', (err, project) ->
+        gitlab._searchProject 'company/project-3', (err, project) ->
           expect(err).to.match(/Unable to find a project that matches/)
           done()
 
       it 'throws an error if multiple projects are matching', (done) ->
-        gitlab.searchProject 'company', (err, project) ->
+        gitlab._searchProject 'company', (err, project) ->
           expect(err).to.match(/Multiple projects have been found for/)
           done()
 
       it 'returns a single project if only one match is present', (done) ->
-        gitlab.searchProject 'project-1', (err, project) ->
+        gitlab._searchProject 'project-1', (err, project) ->
           expect(err).to.be(null)
           expect(project).to.be.a(Project)
           expect(project.displayName).to.equal('company/project-1')
           done()
 
-    describe 'readProjectMembers', ->
+    describe '_readProjectMembers', ->
       it 'throws an error if no project instance is passed', ->
         expect(->
-          gitlab.readProjectMembers { id: 1 }
+          gitlab._readProjectMembers { id: 1 }
         ).to.throwError(/passed argument is no instance of Project/)
 
       it 'propagates an error if no users are available', (done) ->
         project = new Project(id: 1)
 
         this.stubApiFor '/api/v3/projects/1/members', null, []
-        gitlab.readProjectMembers project, (err, user) ->
+        gitlab._readProjectMembers project, (err, user) ->
           expect(err).to.be.an(Error)
           expect(err).to.match(/No members found/)
           done()
@@ -284,7 +307,7 @@ describe 'helpers', ->
         project = new Project(id: 1)
 
         this.stubApiFor '/api/v3/projects/1/members', new Error('omg omg omg'), null
-        gitlab.readProjectMembers project, (err, user) ->
+        gitlab._readProjectMembers project, (err, user) ->
           expect(err).to.be.an(Error)
           done()
 
@@ -376,19 +399,19 @@ describe 'helpers', ->
           expect(mergeRequest).to.be.a(MergeRequest)
           done()
 
-    describe 'readMergeRequestViaPublicId', ->
+    describe '_readMergeRequestViaPublicId', ->
       it 'throws an error if the passed object is no project', ->
         expect(->
-          gitlab.readMergeRequestViaPublicId id: 1
+          gitlab._readMergeRequestViaPublicId id: 1
         ).to.throwError(/no instance of Project/)
 
       it 'propagates an error if no merge requests were matching', (done) ->
         this.stubApiFor "/api/v3/projects/1/merge_requests?page=1", null, [{ iid: 11, id: 1}]
         this.stubApiFor "/api/v3/projects/1/merge_requests?page=2", null, []
 
-        project = new Project(id: 1, path_with_namespace: 'company/project-1')
+        project = support.factories.project()
 
-        gitlab.readMergeRequestViaPublicId project, 12, (err, mergeRequest) ->
+        gitlab._readMergeRequestViaPublicId project, 12, (err, mergeRequest) ->
           expect(err).to.be.an(Error)
           expect(err).to.match(/Unable to find merge request #12 for project 'company\/project-1'/)
           done()
@@ -397,64 +420,64 @@ describe 'helpers', ->
         this.stubApiFor "/api/v3/projects/1/merge_requests?page=1", null, [{ iid: 11, id: 1}, { iid: 11, id: 2}]
         this.stubApiFor "/api/v3/projects/1/merge_requests?page=2", null, []
 
-        project = new Project(id: 1, path_with_namespace: 'company/project-1')
+        project = support.factories.project()
 
-        gitlab.readMergeRequestViaPublicId project, 11, (err, mergeRequest) ->
+        gitlab._readMergeRequestViaPublicId project, 11, (err, mergeRequest) ->
           expect(err).to.be.an(Error)
           expect(err).to.match(/Too many merge requests found/)
           done()
 
-    describe 'readGroup', ->
+    describe '_readGroup', ->
       it 'propagates api errors', (done) ->
         this.stubApiFor "/api/v3/groups/1", 'wtf', null
 
-        gitlab.readGroup 1, (err, group) ->
+        gitlab._readGroup 1, (err, group) ->
           expect(err).to.match(/wtf/)
           done()
 
       it 'generates an error if group has not been found', (done) ->
         this.stubApiFor "/api/v3/groups/1", null, null
 
-        gitlab.readGroup 1, (err, group) ->
+        gitlab._readGroup 1, (err, group) ->
           expect(err).to.be.an(Error)
           expect(err).to.match(/No group found/)
           done()
 
-    describe 'readGroupMembers', ->
+    describe '_readGroupMembers', ->
       it 'throws an error if passed argument is no group', ->
         expect(->
-          gitlab.readGroupMembers id: 1
+          gitlab._readGroupMembers id: 1
         ).to.throwError(/The passed argument is no instance of Group/)
 
       it 'propagates api errors', (done) ->
         this.stubApiFor "/api/v3/groups/1/members", new Error('some errors'), null
-        gitlab.readGroupMembers new Group(id: 1), (err, members) ->
+        gitlab._readGroupMembers new Group(id: 1), (err, members) ->
           expect(err).to.be.an(Error)
           expect(err).to.match(/some errors/)
           done()
 
-    describe 'assignMergeRequestTo', ->
+    describe '_assignMergeRequestTo', ->
       beforeEach ->
         @member       = new User(id: 1)
-        @project      = new Project(id: 1)
+        @project      = support.factories.project()
         @mergeRequest = new MergeRequest(id: 1)
         @stubApiFor "/api/v3/projects/#{@project.id}/merge_request/#{@mergeRequest.id}?assignee_id=#{@member.id}", 'foo', null
 
       it 'throws an error if passed argument is no instance of User', ->
         expect(=>
-          gitlab.assignMergeRequestTo id: 1
+          gitlab._assignMergeRequestTo id: 1
         ).to.throwError(/The passed argument is no instance of User/)
 
       it 'throws an error if passed argument is no instance of Project', ->
         expect(=>
-          gitlab.assignMergeRequestTo @member, id: 1
+          gitlab._assignMergeRequestTo @member, id: 1
         ).to.throwError(/The passed argument is no instance of Project/)
 
       it 'throws an error if passed argument is no instance of MergeRequest', ->
         expect(=>
-          gitlab.assignMergeRequestTo @member, @project, id: 1
+          gitlab._assignMergeRequestTo @member, @project, id: 1
         ).to.throwError(/The passed argument is no instance of MergeRequest/)
 
       it 'does not throw if the arguments are instance of the respective class', (done) ->
-        gitlab.assignMergeRequestTo @member, @project, @mergeRequest, ->
+        gitlab._assignMergeRequestTo @member, @project, @mergeRequest, ->
           done()

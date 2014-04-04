@@ -14,18 +14,29 @@
 #   *:      All merge requests
 #
 
-path = require 'path'
-view = require path.resolve(__dirname, '..', 'views', 'list')
+path    = require 'path'
+view    = require path.resolve(__dirname, '..', 'views', 'list')
+helpers = require path.resolve(__dirname, '..', 'helpers')
 
 module.exports = (robot) ->
-  routeRegExp = /((m(erge-)?r(equest)?)|(p(ull-)?r(equest)?))\sl(ist)?/
+  routeRegExp = /((merge-request|mr)|(pull-request|pr))\sl(ist)?/
 
   robot.respond routeRegExp, (msg) ->
-    scope = msg.envelope.message.text.replace(/(^bender )/, "").replace(routeRegExp, "").trim()
+    botNameRemoval = /(^[^\s]+\s+)/
+    scope          = msg.envelope.message.text.replace(botNameRemoval, "").replace(routeRegExp, "").trim()
+    endpoint       = if !!msg.envelope.message.text.match(/(pull-request|pr)\s/)
+      helpers.githubEndpoint
+    else
+      helpers.gitlabEndpoint
+
+    if scope == '*'
+      scope = ''
+    else
+      scope ||= 'open'
 
     msg.reply "Searching for merge requests ..."
 
-    view.render scope, (err, content) ->
+    view.render endpoint, scope, (err, content) ->
       if err
         msg.reply "An error occurred: #{err}"
       else

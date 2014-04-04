@@ -1,32 +1,30 @@
 path    = require 'path'
+_       = require 'lodash'
 _s      = require 'underscore.string'
-helpers = require path.resolve(__dirname, '..', 'helpers')
 
 module.exports =
-  render: (scope, callback) ->
-    helpers.gitlabEndpoint.readMergeRequests (err, result) ->
+  render: (endpoint, scope, callback) ->
+    endpoint.readMergeRequests (err, requests) ->
       if err
         callback err, null
       else
         answer = ""
 
-        result.forEach (hash) ->
-          requests = hash.requests
+        unless _.contains [null, '', '*'], scope
+          requests = requests.filter (request) ->
+            _s.startsWith request.state.toLowerCase(), scope.toLowerCase()
 
-          if scope == '*'
-            scope = ''
-          else
-            scope ||= 'open'
+        if requests.length == 0
+          callback null, "Nothing to do!"
+        else
+          groups = _.groupBy requests, (request) ->
+            request.project.displayName
 
-          if scope != ''
-            requests = requests.filter (request) ->
-              _s.startsWith(request.state.toLowerCase(), scope.toLowerCase())
+          Object.keys(groups).forEach (projectName) ->
+            answer += "\n\n#{projectName}"
+            answer += "\n#{[1..projectName.length].map(-> '-').join('')}"
 
-          if requests.length > 0
-            answer += "\n\n#{hash.project.displayName}"
-            answer += "\n#{[1..hash.project.displayName.length].map(-> '-').join('')}"
-
-            requests.forEach (request) ->
+            _.sortBy(groups[projectName], 'publicId').forEach (request) ->
               answer += "\n#{request.condensed}"
 
         callback null, "/quote #{answer.trim()}"

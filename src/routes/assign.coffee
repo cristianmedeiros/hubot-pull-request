@@ -21,7 +21,8 @@ module.exports = (robot) ->
   routeRegExp = /((m(erge-)?r(equest)?)|(p(ull-)?r(equest)?))\sa(ssign)?/
 
   robot.respond routeRegExp, (msg) ->
-    message        = msg.envelope.message.text.replace(/(^bender )/, "").replace(routeRegExp, "").trim()
+    botNameRemoval = /(^[^\s]+\s+)/
+    message        = msg.envelope.message.text.replace(botNameRemoval, "").replace(routeRegExp, "").trim()
     match          = message.match(/([^\s]+)\s#?([\d]+)/)
     projectName    = match[1]
     mergeRequestId = match[2]

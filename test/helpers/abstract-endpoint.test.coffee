@@ -8,24 +8,18 @@ describe 'helpers', ->
     beforeEach ->
       support.cleanUpEnvironment()
 
-    [
-      'assignMergeRequest',
-      'assignMergeRequestTo',
-      'readProjectMembers',
-      'readGroupMembers',
-      'readGroup',
-      'searchProject',
-      'readMergeRequests',
-      'readMergeRequestViaPublicId',
-      'readMergeRequest',
-      'readMergeRequestsFor',
-      'readMergeRequestPageFor',
-      'readProjects',
-      'callApi',
-      'generateRequestOptions'
-    ].forEach (functionName) ->
-      describe functionName, ->
-        it "throws an error", ->
-          expect(->
-            abstract[functionName]()
-          ).to.throwError(/is not implemented/)
+    describe 'getPaginationBorder', ->
+      it "defaults to 100", ->
+        expect(abstract.getPaginationBorder()).to.equal(100)
+
+      it "takes the environment variable HUBOT_PULL_REQUEST_PAGINATION_BORDER into account", ->
+        process.env.HUBOT_PULL_REQUEST_PAGINATION_BORDER = 10
+        expect(abstract.getPaginationBorder()).to.equal(10)
+
+    describe 'getPerPage', ->
+      it "defaults to 100", ->
+        expect(abstract.getPerPage()).to.equal(100)
+
+      it "takes the environment variable HUBOT_PULL_REQUEST_PAGINATION_PER_PAGE into account", ->
+        process.env.HUBOT_PULL_REQUEST_PAGINATION_PER_PAGE = 10
+        expect(abstract.getPerPage()).to.equal(10)
