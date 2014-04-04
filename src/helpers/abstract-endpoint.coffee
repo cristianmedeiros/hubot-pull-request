@@ -41,6 +41,9 @@ module.exports =
   _readMergeRequestPageFor: (project, page, callback) ->
     methodMissing('_readMergeRequestPageFor')
 
+  _readProjects: (callback) ->
+    methodMissing('_readProjects')
+
   #
   # readMergeRequestsFor - Returns merge requests for a project.
   #
