@@ -12,6 +12,8 @@ User             = require path.resolve __dirname, '..', 'models', 'user'
 Group            = require path.resolve __dirname, '..', 'models', 'group'
 
 GithubEndpoint = module.exports = _.extend {}, AbstractEndpoint,
+  name: 'github'
+
   #
   # readMergeRequestPageFor - Returns a page slice of merge requests for a project.
   #

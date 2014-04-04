@@ -11,6 +11,8 @@ User             = require path.resolve __dirname, '..', 'models', 'user'
 Group            = require path.resolve __dirname, '..', 'models', 'group'
 
 module.exports = _.extend {}, AbstractEndpoint,
+  name: 'gitlab'
+
   #
   # assignMergeRequest - Assigns a merge request to a random project member.
   #
