@@ -4,7 +4,7 @@ _            = require 'lodash'
 async        = require 'async'
 
 AbstractEndpoint = require path.resolve __dirname, 'abstract-endpoint'
-getConfigs       = require path.resolve __dirname, 'get-configs'
+getConfig       = require path.resolve __dirname, 'get-config'
 Project          = require path.resolve __dirname, '..', 'models', 'project'
 MergeRequest     = require path.resolve __dirname, '..', 'models', 'merge-request'
 User             = require path.resolve __dirname, '..', 'models', 'user'
@@ -63,7 +63,7 @@ module.exports = _.extend {}, AbstractEndpoint,
   # - Object
   #
   _generateRequestOptions: (remotePath, otherOptions={}) ->
-    config  = getConfigs().gitlab
+    config  = getConfig().gitlab
 
     unless config
       throw new Error("There is no configuration for gitlab ...")

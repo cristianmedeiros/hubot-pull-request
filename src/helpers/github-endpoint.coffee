@@ -5,7 +5,7 @@ async   = require 'async'
 Github  = require 'octonode'
 
 AbstractEndpoint = require path.resolve __dirname, 'abstract-endpoint'
-getConfigs       = require path.resolve __dirname, 'get-configs'
+getConfig       = require path.resolve __dirname, 'get-config'
 Project          = require path.resolve __dirname, '..', 'models', 'project'
 MergeRequest     = require path.resolve __dirname, '..', 'models', 'merge-request'
 User             = require path.resolve __dirname, '..', 'models', 'user'
@@ -39,7 +39,7 @@ GithubEndpoint = module.exports = _.extend {}, AbstractEndpoint,
   # - Object
   #
   _generateRequestOptions: (otherOptions={}) ->
-    config  = getConfigs().github
+    config  = getConfig().github
 
     unless config
       throw new Error("There is no configuration for github ...")

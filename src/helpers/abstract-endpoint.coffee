@@ -2,7 +2,7 @@ _         = require 'lodash'
 path      = require 'path'
 async     = require 'async'
 Project   = require path.resolve __dirname, '..', 'models', 'project'
-# getConfig = require path.resolve __dirname, '..', 'helpers', 'get-configs'
+getConfig = require path.resolve __dirname, '..', 'helpers', 'get-config'
 
 module.exports =
   #
