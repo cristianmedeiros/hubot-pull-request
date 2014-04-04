@@ -1,8 +1,12 @@
-_       = require 'lodash'
 path    = require 'path'
 Project = require path.resolve __dirname, '..', 'src', 'models', 'project'
 
 support = module.exports =
+  _: require 'lodash'
+  _s: require 'underscore.string'
+  sinon: require 'sinon'
+  expect: require 'expect.js'
+
   cleanUpEnvironment: ->
     keys = Object.keys process.env
 
@@ -10,10 +14,6 @@ support = module.exports =
       if key.indexOf 'HUBOT_PULL_REQUEST' == 0
         delete process.env[key]
 
-  toJSON: (obj) ->
-    JSON.parse(JSON.stringify(obj))
-
-  fixtures:
   ensureEndpointImplementation: (abstract, endpoint) ->
     describe 'inheritance', ->
       beforeEach ->
@@ -39,9 +39,13 @@ support = module.exports =
           unless support._.contains publicAbstractMethodNames, methodName
             support.expect(support._s.startsWith(methodName, '_')).to.be.ok()
 
+  toJSON: (obj) ->
+    JSON.parse(JSON.stringify(obj))
+
+  fixtures:
     gitlab:
       project: (options) ->
-        _.defaults options || {}, {
+        support._.defaults options || {}, {
           id: 1
           path_with_namespace: 'company/project-1'
           namespace:
@@ -49,7 +53,7 @@ support = module.exports =
         }
 
       mergeRequest: (options) ->
-        result = _.extend {
+        result = support._.extend {
           id: 1
           state: 'opened'
           title: 'this merge request makes things better'
@@ -59,7 +63,7 @@ support = module.exports =
 
     github:
       project: (options) ->
-        _.defaults options || {}, {
+        support._.defaults options || {}, {
           id: 1
           full_name: 'company/project-1'
           owner:
