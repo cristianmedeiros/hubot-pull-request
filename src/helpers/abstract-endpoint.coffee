@@ -8,7 +8,7 @@ methodMissing = (methodName) ->
 
 module.exports =
   #
-  # readMergeRequests - Returns merge requests for all project.
+  # readMergeRequests - Returns merge requests for all projects.
   #
   # Parameters:
   # - callback: A function that gets called, once the result is in place.
