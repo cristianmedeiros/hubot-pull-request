@@ -2,12 +2,13 @@
 
 ## v0.1.0
 
-- Added possibility to list all merge request of a gitlab server
+- Added possibility to list all merge request from a gitlab server.
   - Triggers:
-    - `hubot merge-request list`
-    - `hubot merge-request l`
-    - `hubot mr list`
-    - `hubot mr l`
+    - `hubot merge-request list <scope>`
+    - `hubot merge-request l <scope>`
+    - `hubot mr list <scope>`
+    - `hubot mr l <scope>`
+    - `<scope>` => One of ['opened', 'closed', 'merged', '*']. Default: 'open'.
 - Added possibility to assign a specific merge request to a random user.
   - Triggers:
     - `hubot merge-request assign <pid> <rid>`
