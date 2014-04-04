@@ -34,10 +34,4 @@ module.exports = (robot) ->
     else
       scope ||= 'open'
 
-    msg.reply "Searching for merge requests ..."
-
-    view.render endpoint, scope, (err, content) ->
-      if err
-        msg.reply "An error occurred: #{err}"
-      else
-        msg.send content
+    view.render msg, endpoint, scope
