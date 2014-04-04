@@ -1,10 +1,8 @@
-_       = require 'lodash'
-path    = require 'path'
-async   = require 'async'
-Project = require path.resolve __dirname, '..', 'models', 'project'
-
-methodMissing = (methodName) ->
-  throw new Error("The method '#{methodName}' is not implemented!")
+_         = require 'lodash'
+path      = require 'path'
+async     = require 'async'
+Project   = require path.resolve __dirname, '..', 'models', 'project'
+# getConfig = require path.resolve __dirname, '..', 'helpers', 'get-configs'
 
 module.exports =
   #
@@ -36,13 +34,16 @@ module.exports =
         )
 
   assignMergeRequest: (projectName, mergeRequestId, callback) ->
-    methodMissing('assignMergeRequest')
+    @_methodMissing 'assignMergeRequest'
 
   _readMergeRequestPageFor: (project, page, callback) ->
-    methodMissing('_readMergeRequestPageFor')
+    @_methodMissing '_readMergeRequestPageFor'
 
   _readProjects: (callback) ->
-    methodMissing('_readProjects')
+    @_methodMissing '_readProjects'
+
+  _methodMissing: (methodName) ->
+    throw new Error("The method '#{methodName}' is not implemented!")
 
   #
   # readMergeRequestsFor - Returns merge requests for a project.
