@@ -6,6 +6,28 @@ getConfig = require path.resolve __dirname, '..', 'helpers', 'get-config'
 
 module.exports =
   #
+  # getPaginationBorder - Returns the highest page number for pagination.
+  #
+  # Can be set via the environment variable HUBOT_PULL_REQUEST_PAGINATION_BORDER.
+  # Default: 100
+  #
+  getPaginationBorder: ->
+    config      = getConfig()
+    configValue = config.pagination && config.pagination.border
+    parseInt(configValue || 100)
+
+  #
+  # getPerPage - Returns the number of items per paginated page.
+  #
+  # Can be set with the environment variable HUBOT_PULL_REQUEST_PAGINATION_PER_PAGE.
+  # Default: 100
+  #
+  getPerPage: ->
+    config      = getConfig()
+    configValue = config.pagination && config.pagination.per && config.pagination.per.page
+    parseInt(configValue || 100)
+
+  #
   # readMergeRequests - Returns merge requests for all projects.
   #
   # Parameters:
@@ -64,7 +86,7 @@ module.exports =
         callback(err, null)
       else if requests.length == 0
         callback(null, mergeRequests)
-      else if page == 100
+      else if page == @getPaginationBorder()
         callback(new Error('Just iterated to page 100 ... Something is strange!'))
       else
         page += 1

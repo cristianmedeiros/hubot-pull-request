@@ -24,7 +24,7 @@ GithubEndpoint = module.exports = _.extend {}, AbstractEndpoint,
     unless project instanceof Project
       throw new Error('The passed argument is no instance of Project.')
 
-    @github.repo(project.displayName).prs { page: page, per_page: 100 }, (err, requests) ->
+    @github.repo(project.displayName).prs { page: page, per_page: @getPerPage() }, (err, requests) ->
       requests &&= requests.map (request) ->
         new MergeRequest request, project
       callback err, requests
@@ -65,7 +65,7 @@ GithubEndpoint = module.exports = _.extend {}, AbstractEndpoint,
       url      = '/user/repos'
 
     readPage = (page, _callback) =>
-      @github.get url, { page: page, per_page: 100 }, (err, status, projects, headers) ->
+      @github.get url, { page: page, per_page: @getPerPage() }, (err, status, projects, headers) ->
         projects &&= projects.map (project) ->
           new Project(
             id:        project.id
