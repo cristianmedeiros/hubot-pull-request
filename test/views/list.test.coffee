@@ -22,21 +22,30 @@ describe 'views', ->
 
     describe "without a specific scope", ->
       it 'returns only the open merge requests', (done) ->
-        view.render helpers.gitlabEndpoint, null, (err, content) ->
-          expect(err).to.be(null)
-          expect(content).to.equal('/quote company/project1\n----------------\n11 » merged » unassigned » urgent thing\n12 » opened » unassigned » this merge request makes things better')
-          done()
+        msg =
+          reply: ->
+          send: (content) ->
+            expect(content).to.equal('/quote company/project1\n----------------\n11 » merged » unassigned » urgent thing\n12 » opened » unassigned » this merge request makes things better')
+            done()
+
+        view.render msg, helpers.gitlabEndpoint, null
 
     describe "with 'merged' scope", ->
       it 'returns only the merged merge requests', (done) ->
-        view.render helpers.gitlabEndpoint, 'merged', (err, content) ->
-          expect(err).to.be(null)
-          expect(content).to.equal('/quote company/project1\n----------------\n11 » merged » unassigned » urgent thing')
-          done()
+        msg =
+          reply: ->
+          send: (content) ->
+            expect(content).to.equal('/quote company/project1\n----------------\n11 » merged » unassigned » urgent thing')
+            done()
+
+        view.render msg, helpers.gitlabEndpoint, 'merged'
 
     describe "with '*' scope", ->
       it 'returns all merge requests', (done) ->
-        view.render helpers.gitlabEndpoint, '*', (err, content) ->
-          expect(err).to.be(null)
-          expect(content).to.equal('/quote company/project1\n----------------\n11 » merged » unassigned » urgent thing\n12 » opened » unassigned » this merge request makes things better')
-          done()
+        msg =
+          reply: ->
+          send: (content) ->
+            expect(content).to.equal('/quote company/project1\n----------------\n11 » merged » unassigned » urgent thing\n12 » opened » unassigned » this merge request makes things better')
+            done()
+
+        view.render msg, helpers.gitlabEndpoint, '*'

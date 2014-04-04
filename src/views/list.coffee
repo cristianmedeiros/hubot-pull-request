@@ -3,10 +3,17 @@ _       = require 'lodash'
 _s      = require 'underscore.string'
 
 module.exports =
-  render: (endpoint, scope, callback) ->
+  render: (msg, endpoint, scope) ->
+    requestType = if endpoint.name == 'github'
+      'pull requests'
+    else
+      'merge requests'
+
+    msg.reply "Searching for #{requestType} on #{endpoint.name} ..."
+
     endpoint.readMergeRequests (err, requests) ->
       if err
-        callback err, null
+        msg.reply "An error occurred: #{err}"
       else
         answer = ""
 
@@ -15,7 +22,7 @@ module.exports =
             _s.startsWith request.state.toLowerCase(), scope.toLowerCase()
 
         if requests.length == 0
-          callback null, "Nothing to do!"
+          msg.send "Nothing to do!"
         else
           groups = _.groupBy requests, (request) ->
             request.project.displayName
@@ -27,4 +34,4 @@ module.exports =
             _.sortBy(groups[projectName], 'publicId').forEach (request) ->
               answer += "\n#{request.condensed}"
 
-        callback null, "/quote #{answer.trim()}"
+          msg.send "/quote #{answer.trim()}"
