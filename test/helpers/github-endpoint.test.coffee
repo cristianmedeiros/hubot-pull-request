@@ -61,20 +61,7 @@ describe 'helpers', ->
     afterEach ->
       this.recoverApi()
 
-    describe 'inheritance', ->
-      # Object.keys(abstract).forEach (methodName) ->
-      #   it "implements #{methodName}", ->
-      #     expect(->
-      #       github[methodName]()
-      #     ).to.not.throwError(/is not implemented/)
-
-      it "only reveils the public methods of the abstract endpoint", ->
-        publicAbstractMethodNames = Object.keys(abstract)
-
-        Object.keys(github).forEach (methodName) ->
-          unless _.contains publicAbstractMethodNames, methodName
-            unless _s.startsWith(methodName, '_')
-              expect().fail("#{methodName} does not start with _.")
+    support.ensureEndpointImplementation.call this, abstract, github
 
     describe '_generateRequestOptions', ->
       describe 'without environment variables', ->

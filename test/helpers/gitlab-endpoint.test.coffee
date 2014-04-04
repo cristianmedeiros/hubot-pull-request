@@ -39,19 +39,7 @@ describe 'helpers', ->
     afterEach ->
       this.recoverApi()
 
-    describe 'implemented methods', ->
-      Object.keys(abstract).forEach (methodName) ->
-        it "implemented #{methodName}", ->
-          expect(->
-            gitlab[methodName]()
-          ).to.not.throwError(/is not implemented/)
-
-      it "only reveils the public methods of the abstract endpoint", ->
-        publicAbstractMethodNames = Object.keys(abstract)
-
-        Object.keys(gitlab).forEach (methodName) ->
-          unless _.contains publicAbstractMethodNames, methodName
-            expect(_s.startsWith(methodName, '_')).to.be.ok()
+    support.ensureEndpointImplementation.call this, abstract, gitlab
 
     describe '_generateRequestOptions', ->
       describe 'without environment variables', ->

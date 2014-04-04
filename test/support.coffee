@@ -14,6 +14,31 @@ support = module.exports =
     JSON.parse(JSON.stringify(obj))
 
   fixtures:
+  ensureEndpointImplementation: (abstract, endpoint) ->
+    describe 'inheritance', ->
+      beforeEach ->
+        @mock = support.sinon.mock(endpoint)
+        @mock.expects('_methodMissing').never()
+
+      afterEach ->
+        @mock.verify()
+
+      Object.keys(abstract).forEach (methodName) ->
+        unless methodName == '_methodMissing'
+          it "implemented #{methodName}", ->
+            try
+              endpoint[methodName]()
+            catch e
+              if e.message.match(/_methodMissing/)
+                throw e
+
+      it "only reveils the public methods of the abstract endpoint", ->
+        publicAbstractMethodNames = Object.keys(abstract)
+
+        Object.keys(endpoint).forEach (methodName) ->
+          unless support._.contains publicAbstractMethodNames, methodName
+            support.expect(support._s.startsWith(methodName, '_')).to.be.ok()
+
     gitlab:
       project: (options) ->
         _.defaults options || {}, {
