@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.2.0
+
+- Added possibility to list all open pull request of from github.
+  - Triggers:
+    - `hubot pull-request list`
+    - `hubot pull-request l`
+    - `hubot pr list`
+    - `hubot pr l`
+
 ## v0.1.0
 
 - Added possibility to list all merge request from a gitlab server.
