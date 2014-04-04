@@ -5,6 +5,8 @@ Project   = require path.resolve __dirname, '..', 'models', 'project'
 getConfig = require path.resolve __dirname, '..', 'helpers', 'get-config'
 
 module.exports =
+  name: 'abstract'
+
   #
   # getPaginationBorder - Returns the highest page number for pagination.
   #
