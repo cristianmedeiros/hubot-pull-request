@@ -22,8 +22,9 @@ module.exports = (robot) ->
   routeRegExp = /((merge-request|mr)|(pull-request|pr))\sl(ist)?/
 
   robot.respond routeRegExp, (msg) ->
-    scope    = msg.envelope.message.text.replace(/(^bender )/, "").replace(routeRegExp, "").trim()
-    endpoint = if !!msg.envelope.message.text.match(/(pull-request|pr)\s/)
+    botNameRemoval = /(^[^\s]+\s+)/
+    scope          = msg.envelope.message.text.replace(botNameRemoval, "").replace(routeRegExp, "").trim()
+    endpoint       = if !!msg.envelope.message.text.match(/(pull-request|pr)\s/)
       helpers.githubEndpoint
     else
       helpers.gitlabEndpoint
