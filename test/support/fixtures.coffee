@@ -27,4 +27,13 @@ fixtures = module.exports =
         owner:
           id: 1
           type: 'User'
-      }
+      },
+
+    pullRequest: (options) ->
+      result = _.extend {
+        id: 1
+        state: 'opened'
+        title: 'this merge request makes things better'
+      }, options || {}
+      result.number ||= 10 + result.id
+      result
