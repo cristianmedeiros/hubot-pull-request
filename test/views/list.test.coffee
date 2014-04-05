@@ -22,7 +22,8 @@ describe 'views', ->
 
     afterEach (done) ->
       msg =
-        reply: ->
+        reply: (content) =>
+          expect(content).to.equal(@greeting)
         send: (content) =>
           expect(content).to.equal(@content)
           done()
@@ -32,6 +33,7 @@ describe 'views', ->
     describe 'gitlab', ->
       beforeEach ->
         @endpoint = helpers.gitlabEndpoint
+        @greeting = 'Searching for merge requests on gitlab ...'
 
       describe "without a specific scope", ->
         it 'returns only the open merge requests', ->

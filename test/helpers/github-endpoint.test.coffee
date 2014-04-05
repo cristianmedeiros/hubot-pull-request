@@ -163,3 +163,9 @@ describe 'helpers', ->
             expect(project).to.be.a(Project)
 
           done()
+
+    describe '_readMergeRequestPageFor', ->
+      it "throws an error if the passed argument is no Project", ->
+        expect(->
+          github._readMergeRequestPageFor id: 1
+        ).to.throwError(/no instance of Project/)
