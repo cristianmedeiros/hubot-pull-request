@@ -20,32 +20,30 @@ describe 'views', ->
       this.stubApiFor "/api/v3/projects/1/merge_requests?page=2", null, []
       this.stubApiFor "/api/v3/projects/2/merge_requests?page=1", null, []
 
-    describe "without a specific scope", ->
-      it 'returns only the open merge requests', (done) ->
-        msg =
-          reply: ->
-          send: (content) ->
-            expect(content).to.equal('/quote company/project1\n----------------\n11 » merged » unassigned » urgent thing\n12 » opened » unassigned » this merge request makes things better')
-            done()
+    afterEach (done) ->
+      msg =
+        reply: ->
+        send: (content) =>
+          expect(content).to.equal(@content)
+          done()
 
-        view.render msg, helpers.gitlabEndpoint, null
+      view.render msg, @endpoint, @scope
 
-    describe "with 'merged' scope", ->
-      it 'returns only the merged merge requests', (done) ->
-        msg =
-          reply: ->
-          send: (content) ->
-            expect(content).to.equal('/quote company/project1\n----------------\n11 » merged » unassigned » urgent thing')
-            done()
+    describe 'gitlab', ->
+      beforeEach ->
+        @endpoint = helpers.gitlabEndpoint
 
-        view.render msg, helpers.gitlabEndpoint, 'merged'
+      describe "without a specific scope", ->
+        it 'returns only the open merge requests', ->
+          @scope   = null
+          @content = '/quote company/project1\n----------------\n11 » merged » unassigned » urgent thing\n12 » opened » unassigned » this merge request makes things better'
 
-    describe "with '*' scope", ->
-      it 'returns all merge requests', (done) ->
-        msg =
-          reply: ->
-          send: (content) ->
-            expect(content).to.equal('/quote company/project1\n----------------\n11 » merged » unassigned » urgent thing\n12 » opened » unassigned » this merge request makes things better')
-            done()
+      describe "with 'merged' scope", ->
+        it 'returns only the merged merge requests', ->
+          @scope   = 'merged'
+          @content = '/quote company/project1\n----------------\n11 » merged » unassigned » urgent thing'
 
-        view.render msg, helpers.gitlabEndpoint, '*'
+      describe "with '*' scope", ->
+        it 'returns all merge requests', ->
+          @scope   = '*'
+          @content = '/quote company/project1\n----------------\n11 » merged » unassigned » urgent thing\n12 » opened » unassigned » this merge request makes things better'
