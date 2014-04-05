@@ -1,11 +1,20 @@
 path    = require 'path'
-Project = require path.resolve __dirname, '..', 'src', 'models', 'project'
 
 support = module.exports =
-  _: require 'lodash'
-  _s: require 'underscore.string'
-  sinon: require 'sinon'
-  expect: require 'expect.js'
+  _:         require 'lodash'
+  _s:        require 'underscore.string'
+  sinon:     require 'sinon'
+  expect:    require 'expect.js'
+  fixtures:  require path.resolve(__dirname, 'support', 'fixtures')
+  factories: require path.resolve(__dirname, 'support', 'factories')
+
+  enableGithubApiStubs: (github) ->
+    fn = require path.resolve(__dirname, 'support', 'github-api-stub')
+    fn.call this, github
+
+  enableGitlabApiStubs: (gitlab) ->
+    fn = require path.resolve(__dirname, 'support', 'gitlab-api-stub')
+    fn.call this, gitlab
 
   cleanUpEnvironment: ->
     keys = Object.keys process.env
@@ -41,40 +50,3 @@ support = module.exports =
 
   toJSON: (obj) ->
     JSON.parse(JSON.stringify(obj))
-
-  fixtures:
-    gitlab:
-      project: (options) ->
-        support._.defaults options || {}, {
-          id: 1
-          path_with_namespace: 'company/project-1'
-          namespace:
-            id: 1
-        }
-
-      mergeRequest: (options) ->
-        result = support._.extend {
-          id: 1
-          state: 'opened'
-          title: 'this merge request makes things better'
-        }, options || {}
-        result.iid ||= 10 + result.id
-        result
-
-    github:
-      project: (options) ->
-        support._.defaults options || {}, {
-          id: 1
-          full_name: 'company/project-1'
-          owner:
-            id: 1
-            type: 'User'
-        }
-
-  factories:
-    project: (options) ->
-      data = support.fixtures.gitlab.project(options)
-      new Project(
-        id: data.id, name: data.path_with_namespace,
-        ownerId: data.namespace.id, ownerType: null
-      )
