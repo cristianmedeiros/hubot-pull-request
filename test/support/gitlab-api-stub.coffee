@@ -21,6 +21,7 @@ module.exports = (gitlab) ->
             callback(@apiStubs[path].error, @apiStubs[path].result)
           ), 10)
         else
+          console.log "Unsure what to do with the route '#{path}'."
           setTimeout((-> callback(err, result)), 10)
 
     @stubApiFor = (path, err, result) =>
