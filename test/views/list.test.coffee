@@ -6,7 +6,7 @@ view    = require path.resolve(__dirname, '..', '..', 'src', 'views', 'list')
 helpers = require path.resolve(__dirname, '..', '..', 'src', 'helpers')
 
 describe 'views', ->
-  describe 'merge-request-list', ->
+  describe 'list', ->
     [
       helpers.gitlabEndpoint,
       helpers.githubEndpoint
@@ -16,7 +16,6 @@ describe 'views', ->
         support["enable#{_s.capitalize(endpoint.name)}ApiStubs"].call this, endpoint
 
         describe 'with a stubbed api', ->
-
           # this will actually do the testing
           afterEach (done) ->
             msg =
