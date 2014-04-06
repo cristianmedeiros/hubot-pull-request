@@ -26,10 +26,14 @@ module.exports = (robot) ->
     match          = message.match(/([^\s]+)\s#?([\d]+)/)
     projectName    = match[1]
     mergeRequestId = match[2]
+    endpoint       = if !!msg.envelope.message.text.match(/(pull-request|pr)\s/)
+      helpers.githubEndpoint
+    else
+      helpers.gitlabEndpoint
 
     msg.reply "Assigning merge request ##{mergeRequestId} of #{projectName} ..."
 
-    view.render projectName, mergeRequestId, (err, content) ->
+    view.render msg, endpoint, projectName, mergeRequestId, (err, content) ->
       if err
         msg.reply "An error occurred: #{err}"
       else

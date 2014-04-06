@@ -3,9 +3,11 @@ _s      = require 'underscore.string'
 helpers = require path.resolve(__dirname, '..', 'helpers')
 
 module.exports =
-  render: (projectName, mergeRequestId, callback) ->
-    helpers.gitlab.assignMergeRequest projectName, mergeRequestId, (err, mergeRequest) ->
+  render: (msg, endpoint, projectName, mergeRequestId) ->
+    msg.reply "Assigning merge request ##{mergeRequestId} of #{projectName} ..."
+
+    endpoint.assignMergeRequest projectName, mergeRequestId, (err, mergeRequest) ->
       if err
-        callback err, null
+        msg.reply "An error occurred: #{err}"
       else
-        callback null, "Successfully assigned the merge request '#{mergeRequest.title}' to #{mergeRequest.displayAssignee}."
+        msg.send "Successfully assigned the merge request '#{mergeRequest.title}' to #{mergeRequest.displayAssignee}."
