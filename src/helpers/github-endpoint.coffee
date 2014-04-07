@@ -15,6 +15,37 @@ GithubEndpoint = module.exports = _.extend {}, AbstractEndpoint,
   name: 'github'
 
   #
+  # assignMergeRequest - Assigns a merge request to a random project member.
+  #
+  # Parameters:
+  # - projectName: A needle that will be used for searching the relevant projects.
+  # - mergeRequestId: An ID of a merge request.
+  # - callback: A function that gets called, once the result is in place.
+  #
+  assignMergeRequest: (projectName, mergeRequestId, callback) ->
+    @_searchProject projectName, (err, project) =>
+      if err
+        callback err, null
+      else
+        @_readMergeRequestViaPublicId project, mergeRequestId, (err, mergeRequest) =>
+          if err
+            callback err, null
+          else if !mergeRequest.isOpen
+            callback new Error("The merge request is already #{mergeRequest.state}!"), null
+          else
+            @_readCollaborators project, (err, collaborators) =>
+              if err
+                callback err, null
+              else
+                collaborator = _.sample(collaborators)
+
+                @_assignMergeRequestTo collaborator, project, mergeRequest, (err, mergeRequest) =>
+                  if err
+                    callback err, null
+                  else
+                    callback null, mergeRequest
+
+  #
   # readMergeRequestPageFor - Returns a page slice of merge requests for a project.
   #
   # Parameters:
@@ -116,6 +147,39 @@ GithubEndpoint = module.exports = _.extend {}, AbstractEndpoint,
         orgs = orgs.map (org) ->
           new Group(id: org.id, name: org.login)
         callback null, orgs
+
+  _readMergeRequestViaPublicId: (project, publicId, callback) ->
+    unless project instanceof Project
+      throw new Error('The passed argument is no instance of Project.')
+
+    @github.pr(project.displayName, publicId).info (err, pullRequest) =>
+      if err
+        callback err, null
+      else
+        callback null, new MergeRequest(pullRequest)
+
+  _readCollaborators: (project, callback) ->
+    unless project instanceof Project
+      throw new Error('The passed argument is no instance of Project.')
+
+    @github.repo(project.displayName).collaborators (err, collaborators) =>
+      if err
+        callback err, null
+      else
+        collaborators &&= collaborators.map (collaborator) -> new User(collaborator)
+        callback null, collaborators
+
+  _assignMergeRequestTo: (user, project, pullRequest, callback) ->
+    issue = @github.issue(project.displayName, pullRequest.id)
+    issue.info (err, data) =>
+      @github.issue(project.displayName, pullRequest.publicId).update {
+        assignee: user.data.login
+      }, (err, issue) =>
+        if err
+          callback err, null
+        else
+          callback null, new MergeRequest(issue)
+
 
 Object.defineProperty GithubEndpoint, 'github', get: ->
   @_github ||= Github.client(@_generateRequestOptions().auth)

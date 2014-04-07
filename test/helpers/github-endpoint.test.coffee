@@ -25,7 +25,7 @@ describe 'helpers', ->
 
       describe 'with type, username, password', ->
         beforeEach ->
-          @stubApi()
+          @stubGithubEnvironmentVariables()
           @requestOptions = github._generateRequestOptions()
 
         it 'uses api v3', ->
@@ -39,7 +39,7 @@ describe 'helpers', ->
 
     describe 'github', ->
       beforeEach ->
-        @stubApi()
+        @stubGithubEnvironmentVariables()
         @githubInstance = github.github
 
       it 'contains auth information', ->
@@ -50,12 +50,14 @@ describe 'helpers', ->
 
     describe '_readGroups', ->
       beforeEach ->
-        @stubApiFor '/user/orgs', null, [ { id: 1 } ]
+        @stubGithubApiFor 'get', '/repos/company/project2/pulls', {page: 1, per_page: 100}, null, []
+        @stubGithubApiFor 'get', '/user/orgs', null, null, [ id: 1 ]
 
       it 'returns instances of Group', (done) ->
         github._readGroups (err, orgs) ->
           expect(err).to.be(null)
           expect(orgs).to.be.an(Array)
+          expect(orgs).to.have.length(1)
 
           orgs.forEach (org) ->
             expect(org).to.be.a(Group)
@@ -64,19 +66,19 @@ describe 'helpers', ->
 
     describe 'readMergeRequests', ->
       beforeEach ->
-        @stubApiFor '/user/orgs', null, [ id: 1, login: 'company' ]
-        @stubApiFor '/orgs/company/repos', { page: 1, per_page: 100 }, null, [
+        @stubGithubApiFor 'get', '/user/orgs', null, null, [ id: 1, login: 'company' ]
+        @stubGithubApiFor 'get', '/orgs/company/repos', { page: 1, per_page: 100 }, null, [
           support.fixtures.github.project( owner: { id: 1, type: 'Organization' } )
         ]
-        @stubApiFor '/orgs/company/repos', { page: 2, per_page: 100 }, null, []
-        @stubApiFor '/user/repos', { page: 1, per_page: 100 }, null, [
+        @stubGithubApiFor 'get', '/orgs/company/repos', { page: 2, per_page: 100 }, null, []
+        @stubGithubApiFor 'get', '/user/repos', { page: 1, per_page: 100 }, null, [
           support.fixtures.github.project( id: 2, full_name: 'user/project-1' )
         ]
-        @stubApiFor '/user/repos', { page: 2, per_page: 100 }, null, []
-        @stubApiFor '/repos/company/project-1/pulls', { page: 1, per_page:100 }, null, [ id: 1, state: 'open' ]
-        @stubApiFor '/repos/company/project-1/pulls', { page: 2, per_page:100 }, null, []
-        @stubApiFor '/repos/user/project-1/pulls', { page: 1, per_page:100 }, null, [ id: 1, state: 'open' ]
-        @stubApiFor '/repos/user/project-1/pulls', { page: 2, per_page:100 }, null, []
+        @stubGithubApiFor 'get', '/user/repos', { page: 2, per_page: 100 }, null, []
+        @stubGithubApiFor 'get', '/repos/company/project-1/pulls', { page: 1, per_page:100 }, null, [ id: 1, state: 'open' ]
+        @stubGithubApiFor 'get', '/repos/company/project-1/pulls', { page: 2, per_page:100 }, null, []
+        @stubGithubApiFor 'get', '/repos/user/project-1/pulls', { page: 1, per_page:100 }, null, [ id: 1, state: 'open' ]
+        @stubGithubApiFor 'get', '/repos/user/project-1/pulls', { page: 2, per_page:100 }, null, []
 
       it 'returns instances of MergeRequest', (done) ->
         github.readMergeRequests (err, mergeRequests) ->
@@ -97,15 +99,15 @@ describe 'helpers', ->
 
     describe '_readProjects', ->
       beforeEach ->
-        @stubApiFor '/user/orgs', null, [ id: 1, login: 'company' ]
-        @stubApiFor '/orgs/company/repos', { page: 1, per_page: 100 }, null, [
+        @stubGithubApiFor 'get', '/user/orgs', null, null, [ id: 1, login: 'company' ]
+        @stubGithubApiFor 'get', '/orgs/company/repos', { page: 1, per_page: 100 }, null, [
           support.fixtures.github.project( owner: { id: 1, type: 'Organization' } )
         ]
-        @stubApiFor '/orgs/company/repos', { page: 2, per_page: 100 }, null, []
-        @stubApiFor '/user/repos', { page: 1, per_page: 100 }, null, [
+        @stubGithubApiFor 'get', '/orgs/company/repos', { page: 2, per_page: 100 }, null, []
+        @stubGithubApiFor 'get', '/user/repos', { page: 1, per_page: 100 }, null, [
           support.fixtures.github.project( id: 2, full_name: 'user/project-1' )
         ]
-        @stubApiFor '/user/repos', { page: 2, per_page: 100 }, null, []
+        @stubGithubApiFor 'get', '/user/repos', { page: 2, per_page: 100 }, null, []
 
       it 'transforms the data into a proper Project instance', (done) ->
         github._readProjects (err, projects) =>
