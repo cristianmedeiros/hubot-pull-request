@@ -43,18 +43,19 @@ describe 'views', ->
               @stubApiFor "/api/v3/projects/2/merge_requests?page=1", null, []
             else
               @greeting = 'Searching for pull requests on github ...'
-              @stubApiFor '/user/orgs', null, []
-              @stubApiFor '/user/repos', {"page":1,"per_page":100}, null, [
+
+              @stubGithubApiFor 'get', '/user/orgs', null, null, []
+              @stubGithubApiFor 'get', '/user/repos', {"page":1,"per_page":100}, null, [
                 support.fixtures.github.project(id: 1, full_name: 'company/project1'),
                 support.fixtures.github.project(id: 2, full_name: 'company/project2')
               ]
-              @stubApiFor '/user/repos', {"page":2,"per_page":100}, null, []
-              @stubApiFor "/repos/company/project1/pulls", {page: 1, per_page: 100}, null, [
+              @stubGithubApiFor 'get', '/user/repos', {page: 2, per_page: 100}, null, []
+              @stubGithubApiFor 'get', '/repos/company/project1/pulls', {page: 1, per_page: 100}, null, [
                 support.fixtures.github.pullRequest(state: 'merged', title: 'urgent thing'),
                 support.fixtures.github.pullRequest(id: 2)
               ]
-              @stubApiFor "/repos/company/project1/pulls", {page: 2, per_page: 100}, null, []
-              @stubApiFor "/repos/company/project2/pulls", {page: 1, per_page: 100}, null, []
+              @stubGithubApiFor 'get', '/repos/company/project1/pulls', {page: 2, per_page: 100}, null, []
+              @stubGithubApiFor 'get', '/repos/company/project2/pulls', {page: 1, per_page: 100}, null, []
 
           describe "without a specific scope", ->
             it 'returns only the open merge requests', ->

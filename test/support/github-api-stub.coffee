@@ -5,47 +5,65 @@ module.exports = (github) ->
   beforeEach ->
     support.cleanUpEnvironment()
 
-    @recoverApi = =>
-      if !!@stub
-        @stub = undefined
-        @apiStubs = undefined
-        github.github.get.restore()
+    # schema:
+    #
+    # githubApiStubs:
+    #   method:
+    #     stub: stub
+    #     rules:  [
+    #       path: path
+    #       payload: {}
+    #       error: error
+    #       result: result
+    #     ]
+    @githubApiStubs = {}
 
-    @stubApi = (err, result) =>
+    @recoverGithubApi = =>
+      Object.keys(@githubApiStubs).forEach (key) ->
+        github.github[key].restore()
+      @githubApiStubs = {}
+
+    @evaluateGithubApiCall = (method) =>
+      args     = [].slice.apply(arguments)
+      method   = args[0]
+      path     = args[1]
+      payload  = if args.length > 3 then args[2] else null
+      callback = args[args.length - 1]
+      stub     = @githubApiStubs[method].stub
+      rules    = @githubApiStubs[method].rules.filter (rule) ->
+        rule.path == path &&
+        JSON.stringify(rule.payload) == JSON.stringify(payload)
+
+      if rules.length == 0
+        console.log "Unsure what to do with the following route: #{method.toUpperCase()} #{path} - #{JSON.stringify(payload)}."
+        setTimeout((-> callback(new Error('no match for route'), null)), 10)
+      else
+        rule = rules[0]
+
+        setTimeout((=>
+          status = if !!rule.error then 404 else 200
+          callback rule.err, status, rule.result, {}
+        ), 10)
+
+    @stubGithubEnvironmentVariables = ->
       process.env.HUBOT_PULL_REQUEST_GITHUB_AUTH_USERNAME ||= 'username'
       process.env.HUBOT_PULL_REQUEST_GITHUB_AUTH_PASSWORD ||= 'password'
 
-      @stub ||= support.sinon.stub github.github, 'get', =>
-        args     = [].slice.apply(arguments)
-        path     = args[0]
-        options  = if args.length > 2 then args[1] else null
-        callback = args[args.length - 1]
-        stub     = (@apiStubs || {})[path + JSON.stringify(options)]
+    @stubGithubApiFor = (method, path, payload, err, result) =>
+      @stubGithubEnvironmentVariables()
 
-        if !!stub && (!stub.filter || JSON.stringify(options) == JSON.stringify(stub.filter))
-          setTimeout((=>
-            err     = stub.error
-            status  = if !!err then 404 else 200
-            body    = stub.result
-            headers = {}
+      @githubApiStubs[method] ||=
+        rules: []
+        stub: support.sinon.stub github.github, method, =>
+          args = [].slice.apply(arguments)
+          @evaluateGithubApiCall.apply this, [method].concat(args)
 
-            callback err, status, body, headers
-          ), 10)
-        else
-          console.log "Unsure what to do with the route '#{path}' <-> #{JSON.stringify(options)}."
-          setTimeout((-> callback(err, result)), 10)
-
-    @stubApiFor = (path, filter, err, result) =>
-      args = [].slice.apply(arguments)
-
-      if args.length == 3
-        result = err
-        err    = filter
-        filter = null
-
-      @stubApi()
-      @apiStubs ||= {}
-      @apiStubs[path + JSON.stringify(filter)] = { error: err, result: result, filter: filter }
+      @githubApiStubs[method].rules.push(
+        path:    path
+        payload: payload
+        error:   err
+        result:  result
+      )
 
   afterEach ->
-    @recoverApi()
+    @recoverGithubApi()
