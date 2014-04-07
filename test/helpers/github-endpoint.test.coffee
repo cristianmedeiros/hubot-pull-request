@@ -14,7 +14,7 @@ User         = require path.resolve __dirname, '..', '..', 'src', 'models', 'use
 describe 'helpers', ->
   describe 'githubEndpoint', ->
     support.enableGithubApiStubs.call this, github
-    # support.ensureEndpointImplementation.call this, abstract, github
+    support.ensureEndpointImplementation.call this, abstract, github
 
     describe '_generateRequestOptions', ->
       describe 'without environment variables', ->
