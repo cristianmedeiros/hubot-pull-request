@@ -44,7 +44,7 @@ module.exports =
   readMergeRequests: (callback) ->
     @_readProjects (err, projects) =>
       if err
-        callback(err, null)
+        callback err, null
       else
         async.map(
           projects,
@@ -86,11 +86,11 @@ module.exports =
 
     _callback = (err, requests) =>
       if (err)
-        callback(err, null)
+        callback err, null
       else if requests.length == 0
-        callback(null, mergeRequests)
+        callback null, mergeRequests
       else if page == @getPaginationBorder()
-        callback(new Error('Just iterated to page 100 ... Something is strange!'))
+        callback new Error('Just iterated to page 100 ... Something is strange!'), null
       else
         page += 1
         mergeRequests = mergeRequests.concat requests
@@ -119,7 +119,7 @@ module.exports =
   _searchProject: (needle, callback) ->
     @_readProjects (err, projects) =>
       if err
-        callback(err, null)
+        callback err, null
       else
         project  = null
         projects = projects.filter (project) -> project.hasName(needle)
