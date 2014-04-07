@@ -128,7 +128,7 @@ module.exports =
           project  = _project if distance == 0
           distance
 
-        if projects.length == 0
+        if _.isEmpty projects
           callback new Error("Unable to find a project that matches '#{needle}'."), null
         else if !project && projects.length > 1
           message = "Multiple projects have been found for '#{needle}'."
