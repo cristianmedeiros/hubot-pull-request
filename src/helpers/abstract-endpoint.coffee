@@ -121,16 +121,19 @@ module.exports =
       if err
         callback err, null
       else
-        project  = null
-        projects = projects.filter (project) -> project.hasName(needle)
-        projects = _.sortBy projects, (_project) ->
-          distance = _s.levenshtein(_project.displayName, needle)
-          project  = _project if distance == 0
+        exactMatch = null
+        projects   = projects.filter (project) -> project.hasName(needle)
+        projects   = _.sortBy projects, (project) ->
+          distance   = _s.levenshtein project.displayName, needle
+          exactMatch = project if distance == 0
           distance
 
         if _.isEmpty projects
           callback new Error("Unable to find a project that matches '#{needle}'."), null
-        else if !project && projects.length > 1
+        else if !exactMatch && projects.length > 1
+          # We have no exact match and the search found more than one entry.
+          # Tell the user about the conflict ...
+
           message = "Multiple projects have been found for '#{needle}'."
 
           projects.forEach (project) ->
@@ -138,4 +141,5 @@ module.exports =
 
           callback new Error(message), null
         else
-          callback null, project || projects[0]
+          # We have either found an exact match or exactly one matching project.
+          callback null, exactMatch || projects[0]
