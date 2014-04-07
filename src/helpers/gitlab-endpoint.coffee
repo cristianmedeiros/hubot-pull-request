@@ -167,28 +167,6 @@ module.exports = _.extend {}, AbstractEndpoint,
       else
         callback null, matchingRequests[0]
 
-  #
-  # searchProject - Returns a project that matches the passed needle.
-  #
-  # Parameters:
-  # - needle: A string that gets searched for in the project names.
-  # - callback: A function that gets called, once the result is in place.
-  #
-  _searchProject: (needle, callback) ->
-    @_readProjects (err, projects) =>
-      if err
-        callback(err, null)
-      else
-        projects = projects.filter (project) ->
-          project.hasName(needle)
-
-        if projects.length == 0
-          callback new Error("Unable to find a project that matches '#{needle}'."), null
-        else if projects.length > 1
-          callback new Error("Multiple projects have been found for '#{needle}'."), null
-        else
-          callback null, projects[0]
-
   _readGroup: (groupId, callback) ->
     @_callApi "/api/v3/groups/#{groupId}", (err, group) ->
       if group &&= new Group(id: group.id)

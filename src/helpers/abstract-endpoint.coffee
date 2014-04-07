@@ -1,4 +1,5 @@
 _         = require 'lodash'
+_s        = require 'underscore.string'
 path      = require 'path'
 async     = require 'async'
 Project   = require path.resolve __dirname, '..', 'models', 'project'
@@ -96,3 +97,45 @@ module.exports =
         @_readMergeRequestPageFor project, page, _callback
 
     @_readMergeRequestPageFor project, page, _callback
+
+  #
+  # searchProject - Returns a project that matches the passed needle.
+  #
+  # It will return the project with an exact match if there are multiple
+  # matching projects. Example:
+  #
+  # Premise - The following projects exist:
+  #
+  # - sdepold/node-imageable
+  # - sdepold/node-imageable-server
+  #
+  # A search for `node-imageable` will result in an error as there is no exact
+  # match. A search for `sdepold/node-imageable` will use the respective repo.
+  #
+  # Parameters:
+  # - needle: A string that gets searched for in the project names.
+  # - callback: A function that gets called, once the result is in place.
+  #
+  _searchProject: (needle, callback) ->
+    @_readProjects (err, projects) =>
+      if err
+        callback(err, null)
+      else
+        project  = null
+        projects = projects.filter (project) -> project.hasName(needle)
+        projects = _.sortBy projects, (_project) ->
+          distance = _s.levenshtein(_project.displayName, needle)
+          project  = _project if distance == 0
+          distance
+
+        if projects.length == 0
+          callback new Error("Unable to find a project that matches '#{needle}'."), null
+        else if !project && projects.length > 1
+          message = "Multiple projects have been found for '#{needle}'."
+
+          projects.forEach (project) ->
+            message += "\n- #{project.displayName}"
+
+          callback new Error(message), null
+        else
+          callback null, project || projects[0]
