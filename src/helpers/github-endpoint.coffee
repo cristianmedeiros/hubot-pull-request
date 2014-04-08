@@ -117,5 +117,38 @@ GithubEndpoint = module.exports = _.extend {}, AbstractEndpoint,
           new Group(id: org.id, name: org.login)
         callback null, orgs
 
+  _readMergeRequestViaPublicId: (project, publicId, callback) ->
+    unless project instanceof Project
+      throw new Error('The passed argument is no instance of Project.')
+
+    @github.pr(project.displayName, publicId).info (err, pullRequest) =>
+      if err
+        callback err, null
+      else
+        callback null, new MergeRequest(pullRequest)
+
+  _readCollaborators: (project, callback) ->
+    unless project instanceof Project
+      throw new Error('The passed argument is no instance of Project.')
+
+    @github.repo(project.displayName).collaborators (err, collaborators) =>
+      if err
+        callback err, null
+      else
+        collaborators &&= collaborators.map (collaborator) -> new User(collaborator)
+        callback null, collaborators
+
+  _assignMergeRequestTo: (user, project, pullRequest, callback) ->
+    issue = @github.issue(project.displayName, pullRequest.id)
+    issue.info (err, data) =>
+      @github.issue(project.displayName, pullRequest.publicId).update {
+        assignee: user.data.login
+      }, (err, issue) =>
+        if err
+          callback err, null
+        else
+          callback null, new MergeRequest(issue)
+
+
 Object.defineProperty GithubEndpoint, 'github', get: ->
   @_github ||= Github.client(@_generateRequestOptions().auth)

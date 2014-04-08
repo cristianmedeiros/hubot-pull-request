@@ -14,8 +14,9 @@
 #   *:      All merge requests
 #
 
-path = require 'path'
-view = require path.resolve(__dirname, '..', 'views', 'assign')
+path    = require 'path'
+view    = require path.resolve(__dirname, '..', 'views', 'assign')
+helpers = require path.resolve(__dirname, '..', 'helpers')
 
 module.exports = (robot) ->
   routeRegExp = /((m(erge-)?r(equest)?)|(p(ull-)?r(equest)?))\sa(ssign)?/
@@ -26,11 +27,9 @@ module.exports = (robot) ->
     match          = message.match(/([^\s]+)\s#?([\d]+)/)
     projectName    = match[1]
     mergeRequestId = match[2]
+    endpoint       = if !!msg.envelope.message.text.match(/(pull-request|pr)\s/)
+      helpers.githubEndpoint
+    else
+      helpers.gitlabEndpoint
 
-    msg.reply "Assigning merge request ##{mergeRequestId} of #{projectName} ..."
-
-    view.render projectName, mergeRequestId, (err, content) ->
-      if err
-        msg.reply "An error occurred: #{err}"
-      else
-        msg.send content
+    view.render msg, endpoint, projectName, mergeRequestId

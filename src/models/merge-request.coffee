@@ -14,7 +14,7 @@ module.exports = class MergeRequest
   @property 'id', get: -> @data.id
   @property 'publicId', get: -> @data.iid || @data.number
   @property 'state', get: -> @data.state
-  @property 'isOpen', get: -> @data.state == 'opened'
+  @property 'isOpen', get: -> _.contains ['open', 'opened'], @state
   @property 'displayState', get: -> @state
   @property 'title', get: -> @data.title
   @property 'displayAssignee', get: -> @data.assignee.username || @data.assignee.login

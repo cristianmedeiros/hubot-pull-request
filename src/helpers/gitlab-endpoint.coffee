@@ -1,10 +1,10 @@
-path         = require 'path'
-request      = require 'request'
-_            = require 'lodash'
-async        = require 'async'
+path    = require 'path'
+request = require 'request'
+_       = require 'lodash'
+async   = require 'async'
 
 AbstractEndpoint = require path.resolve __dirname, 'abstract-endpoint'
-getConfig       = require path.resolve __dirname, 'get-config'
+getConfig        = require path.resolve __dirname, 'get-config'
 Project          = require path.resolve __dirname, '..', 'models', 'project'
 MergeRequest     = require path.resolve __dirname, '..', 'models', 'merge-request'
 User             = require path.resolve __dirname, '..', 'models', 'user'
@@ -13,46 +13,25 @@ Group            = require path.resolve __dirname, '..', 'models', 'group'
 module.exports = _.extend {}, AbstractEndpoint,
   name: 'gitlab'
 
-  #
-  # assignMergeRequest - Assigns a merge request to a random project member.
-  #
-  # Parameters:
-  # - projectName: A needle that will be used for searching the relevant projects.
-  # - mergeRequestId: An ID of a merge request.
-  # - callback: A function that gets called, once the result is in place.
-  #
-  assignMergeRequest: (projectName, mergeRequestId, callback) ->
-    @_searchProject projectName, (err, project) =>
-      if err
-        callback err, null
-      else
-        @_readMergeRequestViaPublicId project, mergeRequestId, (err, mergeRequest) =>
-          if err
-            callback err, null
-          else if !mergeRequest.isOpen
-            callback new Error("The merge request is already #{mergeRequest.state}!"), null
-          else
-            @_readGroup project.ownerId, (err, group) =>
-              if err
-                callback err, null
-              else
-                @_readGroupMembers group, (err, groupMembers) =>
-                  if err
-                    callback err, null
-                  else
-                    @_readProjectMembers project, (err, projectMembers) =>
-                      if err
-                        callback err, null
-                      else
-                        members = groupMembers.concat projectMembers
-                        members = _.uniq members, (user) -> user.id
-                        member  = _.sample(members)
+  _readCollaborators: (project, callback) ->
+    async.waterfall [
+      (asyncCallback) =>
+        @_readGroup project.ownerId, (err, group) ->
+          return asyncCallback(err, null) if err
+          asyncCallback null, group
 
-                        @_assignMergeRequestTo member, project, mergeRequest, (err, mergeRequest) =>
-                          if err
-                            callback err, null
-                          else
-                            callback null, mergeRequest
+      (group, asyncCallback) =>
+        @_readGroupMembers group, (err, members) ->
+          return asyncCallback(err, null) if err
+          asyncCallback null, members
+
+      (members, asyncCallback) =>
+        @_readProjectMembers project, (err, projectMembers) ->
+          return asyncCallback(err, null) if err
+          members = members.concat projectMembers
+          members = _.uniq members, (user) -> user.id
+          asyncCallback null, members
+    ], callback
 
   #
   # generateRequestOptions - Returns the options for the request call.
@@ -166,28 +145,6 @@ module.exports = _.extend {}, AbstractEndpoint,
         callback err, null
       else
         callback null, matchingRequests[0]
-
-  #
-  # searchProject - Returns a project that matches the passed needle.
-  #
-  # Parameters:
-  # - needle: A string that gets searched for in the project names.
-  # - callback: A function that gets called, once the result is in place.
-  #
-  _searchProject: (needle, callback) ->
-    @_readProjects (err, projects) =>
-      if err
-        callback(err, null)
-      else
-        projects = projects.filter (project) ->
-          project.hasName(needle)
-
-        if projects.length == 0
-          callback new Error("Unable to find a project that matches '#{needle}'."), null
-        else if projects.length > 1
-          callback new Error("Multiple projects have been found for '#{needle}'."), null
-        else
-          callback null, projects[0]
 
   _readGroup: (groupId, callback) ->
     @_callApi "/api/v3/groups/#{groupId}", (err, group) ->

@@ -35,11 +35,7 @@ support = module.exports =
       Object.keys(abstract).forEach (methodName) ->
         unless methodName == '_methodMissing'
           it "implemented #{methodName}", ->
-            try
-              endpoint[methodName]()
-            catch e
-              if e.message.match(/_methodMissing/)
-                throw e
+            support.expect(endpoint[methodName].toString()).to.not.contain("methodMissing")
 
       it "only reveils the public methods of the abstract endpoint", ->
         publicAbstractMethodNames = Object.keys(abstract)
