@@ -71,6 +71,37 @@ module.exports =
     throw new Error("The method '#{methodName}' is not implemented!")
 
   #
+  # assignMergeRequest - Assigns a merge request to a random project member.
+  #
+  # Parameters:
+  # - projectName: A needle that will be used for searching the relevant projects.
+  # - mergeRequestId: An ID of a merge request.
+  # - callback: A function that gets called, once the result is in place.
+  #
+  assignMergeRequest: (projectName, mergeRequestId, callback) ->
+    async.waterfall [
+      (asyncCallback) =>
+        @_searchProject projectName, asyncCallback
+
+      (project, asyncCallback) =>
+        @_readMergeRequestViaPublicId project, mergeRequestId, (err, mergeRequest) ->
+          return asyncCallback(err, null) if err
+          return asyncCallback(new Error("The merge request is already #{mergeRequest.state}!"), null) if !mergeRequest.isOpen
+          asyncCallback null, project, mergeRequest
+
+      (project, mergeRequest, asyncCallback) =>
+        @_readCollaborators project, (err, collaborators) ->
+          return asyncCallback(err, null) if err
+          collaborator = _.sample(collaborators)
+          asyncCallback null, project, mergeRequest, collaborator
+
+      (project, mergeRequest, member, asyncCallback) =>
+        @_assignMergeRequestTo member, project, mergeRequest, (err, mergeRequest) ->
+          return asyncCallback(err, null) if err
+          asyncCallback null, mergeRequest
+    ], callback
+
+  #
   # readMergeRequestsFor - Returns merge requests for a project.
   #
   # Parameters:

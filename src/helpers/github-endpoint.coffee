@@ -15,37 +15,6 @@ GithubEndpoint = module.exports = _.extend {}, AbstractEndpoint,
   name: 'github'
 
   #
-  # assignMergeRequest - Assigns a merge request to a random project member.
-  #
-  # Parameters:
-  # - projectName: A needle that will be used for searching the relevant projects.
-  # - mergeRequestId: An ID of a merge request.
-  # - callback: A function that gets called, once the result is in place.
-  #
-  assignMergeRequest: (projectName, mergeRequestId, callback) ->
-    @_searchProject projectName, (err, project) =>
-      if err
-        callback err, null
-      else
-        @_readMergeRequestViaPublicId project, mergeRequestId, (err, mergeRequest) =>
-          if err
-            callback err, null
-          else if !mergeRequest.isOpen
-            callback new Error("The merge request is already #{mergeRequest.state}!"), null
-          else
-            @_readCollaborators project, (err, collaborators) =>
-              if err
-                callback err, null
-              else
-                collaborator = _.sample(collaborators)
-
-                @_assignMergeRequestTo collaborator, project, mergeRequest, (err, mergeRequest) =>
-                  if err
-                    callback err, null
-                  else
-                    callback null, mergeRequest
-
-  #
   # readMergeRequestPageFor - Returns a page slice of merge requests for a project.
   #
   # Parameters:
