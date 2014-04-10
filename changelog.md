@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.3.0
+- Added possibility to assign a pull request to a random user.
+  - Triggers:
+    - `hubot pull-request assign <pid> <rid>`
+    - `hubot pull-request a <pid> <rid>`
+    - `<pid>` => An identifier of a project á la `namespace/project-1`
+    - `<rid>` => The public id of a pull request (as in the URL).
+
 ## v0.2.0
 
 - Added possibility to list all open pull request of from github.
