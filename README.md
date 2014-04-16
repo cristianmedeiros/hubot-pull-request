@@ -17,6 +17,8 @@ A hubot script that handles merge requests (Gitlab) and pull requests (Github).
 - `hubot merge-request list <scope>`
 - `hubot merge-request assign <project-identifier> <merge-request-identifier>`
 - `hubot pull-request list`
+- `hubot pull-request assign <project-identifier> <pull-request-identifier>`
+
 
 
 ## Installation
