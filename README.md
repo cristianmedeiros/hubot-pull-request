@@ -2,10 +2,6 @@
 
 A hubot script that handles merge requests (Gitlab) and pull requests (Github).
 
-## Tiny note
-
-- Github is not yet fully supported.
-
 ## Features
 
 - List all merge requests from a Gitlab server.
