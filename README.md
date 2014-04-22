@@ -26,7 +26,7 @@ Add `hubot-pull-request` to your `package.json` file:
   "dependencies": {
     "hubot": ">= 2.5.1",
     "hubot-scripts": ">= 2.4.2",
-    "hubot-fliptable": ">= 0.0.0"
+    "hubot-pull-request": ">= 0.0.0"
   }
 ```
 
