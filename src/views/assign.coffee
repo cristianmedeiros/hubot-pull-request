@@ -2,6 +2,7 @@ path    = require 'path'
 _s      = require 'underscore.string'
 helpers = require path.resolve(__dirname, '..', 'helpers')
 
+# @deprecated: moved to routes, to simplify assignment of subscribers
 module.exports =
   render: (msg, endpoint, projectName, mergeRequestId) ->
     requestType = if endpoint.name == 'github'

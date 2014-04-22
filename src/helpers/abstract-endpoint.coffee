@@ -1,9 +1,10 @@
-_         = require 'lodash'
-_s        = require 'underscore.string'
-path      = require 'path'
-async     = require 'async'
-Project   = require path.resolve __dirname, '..', 'models', 'project'
-getConfig = require path.resolve __dirname, '..', 'helpers', 'get-config'
+_           = require 'lodash'
+_s          = require 'underscore.string'
+path        = require 'path'
+async       = require 'async'
+Project     = require path.resolve __dirname, '..', 'models', 'project'
+Subscriber  = require path.resolve __dirname, '..', 'models', 'subscriber'
+getConfig   = require path.resolve __dirname, '..', 'helpers', 'get-config'
 
 module.exports =
   name: 'abstract'
@@ -78,7 +79,7 @@ module.exports =
   # - mergeRequestId: An ID of a merge request.
   # - callback: A function that gets called, once the result is in place.
   #
-  assignMergeRequest: (projectName, mergeRequestId, callback) ->
+  assignMergeRequest: (projectName, mergeRequestId, callback, subscribers) ->
     async.waterfall [
       (asyncCallback) =>
         @_searchProject projectName, asyncCallback
@@ -92,7 +93,18 @@ module.exports =
       (project, mergeRequest, asyncCallback) =>
         @_readCollaborators project, (err, collaborators) ->
           return asyncCallback(err, null) if err
-          collaborator = _.sample(collaborators)
+          
+          randomUser = Subscriber.randomUserFor(name, projectName, subscribers)
+          console.log "randomUser:"
+          console.log randomUser
+          if !! randomUser && !! _.first(collaborators, (user) -> user.id == randomUser.id)
+            collaborator = randomUser 
+          
+          collaborator ||= _.sample(collaborators)
+
+          console.log "collaborator:"
+          console.log collaborator
+          return
           asyncCallback null, project, mergeRequest, collaborator
 
       (project, mergeRequest, member, asyncCallback) =>
