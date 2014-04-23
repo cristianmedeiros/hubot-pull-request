@@ -14,10 +14,10 @@
 #   *:      All merge requests
 #
 
-path    = require 'path'
-_s      = require 'underscore.string'
-# view    = require path.resolve(__dirname, '..', 'views', 'assign')
-helpers = require path.resolve(__dirname, '..', 'helpers')
+path       = require 'path'
+_s         = require 'underscore.string'
+helpers    = require path.resolve(__dirname, '..', 'helpers')
+Subscriber = require path.resolve(__dirname, '..', 'models', 'subscriber')
 
 module.exports = (robot) ->
   routeRegExp = /((m(erge-)?r(equest)?)|(p(ull-)?r(equest)?))\sa(ssign)?/
@@ -38,9 +38,11 @@ module.exports = (robot) ->
     requestType = if endpoint.name == 'github' then 'pull request' else 'merge request'
     msg.reply "Assigning #{requestType} ##{mergeRequestId} of #{projectName} ..."
 
+    userNames = Subscriber.findNamesFor(robot, endpoint.name, projectName)
+
     endpoint.assignMergeRequest projectName, mergeRequestId, (err, mergeRequest) ->
       if err
         msg.reply "An error occurred:\n#{err}"
       else
         msg.send "Successfully assigned the merge request '#{mergeRequest.title}' to #{mergeRequest.displayAssignee}."
-    , robot.brain.data.subscribers
+    , userNames

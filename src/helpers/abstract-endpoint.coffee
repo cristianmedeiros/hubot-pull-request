@@ -3,7 +3,6 @@ _s          = require 'underscore.string'
 path        = require 'path'
 async       = require 'async'
 Project     = require path.resolve __dirname, '..', 'models', 'project'
-Subscriber  = require path.resolve __dirname, '..', 'models', 'subscriber'
 getConfig   = require path.resolve __dirname, '..', 'helpers', 'get-config'
 
 module.exports =
@@ -77,9 +76,11 @@ module.exports =
   # Parameters:
   # - projectName: A needle that will be used for searching the relevant projects.
   # - mergeRequestId: An ID of a merge request.
+  # - userNames: An array of usernames to choose from - set this to null for the default behaviour (all users).
   # - callback: A function that gets called, once the result is in place.
   #
-  assignMergeRequest: (projectName, mergeRequestId, callback, subscribers) ->
+  assignMergeRequest: (projectName, mergeRequestId, callback, userNames) ->
+    serviceName = @name
     async.waterfall [
       (asyncCallback) =>
         @_searchProject projectName, asyncCallback
@@ -94,17 +95,23 @@ module.exports =
         @_readCollaborators project, (err, collaborators) ->
           return asyncCallback(err, null) if err
           
-          randomUser = Subscriber.randomUserFor(name, projectName, subscribers)
-          console.log "randomUser:"
-          console.log randomUser
-          if !! randomUser && !! _.first(collaborators, (user) -> user.id == randomUser.id)
-            collaborator = randomUser 
+          # If there is a users pool, choose a valid user from there
+          console.log userNames
+          if !! userNames
+            collaboratorNames = collaborators.map((c) -> c.username)
+            console.log collaboratorNames
+            candidateNames    = _.intersection(userNames, collaboratorNames)
+            console.log candidateNames
+            if candidateNames.length > 0
+              winnerName = _.sample(candidateNames)
+              console.log winnerName
+
+              collaborator = _.first(collaborators, (c) -> c.username == winnerName || c.login == winnerName)
+            console.log collaborator
           
+          # Otherwise, fall back to all collaborators
           collaborator ||= _.sample(collaborators)
 
-          console.log "collaborator:"
-          console.log collaborator
-          return
           asyncCallback null, project, mergeRequest, collaborator
 
       (project, mergeRequest, member, asyncCallback) =>

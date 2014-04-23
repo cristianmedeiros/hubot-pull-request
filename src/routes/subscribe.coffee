@@ -42,13 +42,19 @@ module.exports = (robot) ->
     params = splitCommand(msg.envelope.message.text, subscribeRegExp)
 
     subscriber = new Subscriber(robot, params)
-    result = subscriber.save()
-    if result == true
-      msg.send "Subscribed #{params.service} user #{params.user} to pull requests for #{params.project}!"
-    else if typeof result == "string"
-      msg.reply "An error occured:\n#{result}"
-    else
-      msg.reply "An error occured:\nCould not subscribe user!"
+    subscriber.save (err, user) ->
+      if err
+        msg.reply "An error occured:\n#{err}"
+      else
+        msg.send "Subscribed #{params.service} user #{params.user} to pull requests for #{params.project}!"
+    
+    # result = subscriber.save()
+    # if result == true
+    #   msg.send "Subscribed #{params.service} user #{params.user} to pull requests for #{params.project}!"
+    # else if typeof result == "string"
+    #   msg.reply "An error occured:\n#{result}"
+    # else
+    #   msg.reply "An error occured:\nCould not subscribe user!"
 
   # Unsubscribe a user from a project
   robot.respond unsubscribeRegExp, (msg) ->
