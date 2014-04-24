@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.4.1
+- Small fixes:
+  - Initializing `subscribers` in Hubot brain, so we don't have to do it manually.
+  - `Subscriber.findNamesFor` performs a clone of the Hubot brain data - otherwise it would modify the persisted data (not desired).
+
 ## v0.4.0
 - Added possibility to subscribe some users to a particular Github / Gitlab project. If a Github / Gitlab project has subscribers on Hubot, then pull / merge request assignments will only go to these subscribers. If no subscribers were found for a given project, Hubot will choose from all project collaborators.
   - Triggers:
