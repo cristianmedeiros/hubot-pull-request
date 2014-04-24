@@ -76,8 +76,8 @@ module.exports =
   # Parameters:
   # - projectName: A needle that will be used for searching the relevant projects.
   # - mergeRequestId: An ID of a merge request.
-  # - userNames: An array of usernames to choose from - set this to null for the default behaviour (all users).
   # - callback: A function that gets called, once the result is in place.
+  # - userNames: An array of usernames to choose from - set this to null / disgard for the default behaviour (all users).
   #
   assignMergeRequest: (projectName, mergeRequestId, callback, userNames) ->
     serviceName = @name

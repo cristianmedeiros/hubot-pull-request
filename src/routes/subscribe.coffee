@@ -3,13 +3,15 @@
 #
 # Commands:
 #   hubot github me <identifier>?                               - Identifies the calling Hubot user with a given Github user name or returns the current state
-#   hubot gitlab me <identifier>?                               - Identifies the calling Hubot user with a given Gitlab user name or returns the current state
 #   hubot github s(ubscribe) <project-name> <identifier>        - Subscribe a Github user to receive pull requests to a certain project from Hubot.
-#   hubot gitlab s(ubscribe) <project-name> <identifier>        - Subscribe a Gitlab user to receive pull requests to a certain project from Hubot.
 #   hubot github uns(ubscribe) <project-name> <identifier>      - Unsubscribe a Github user from receiving pull requests to a certain project from Hubot.
-#   hubot gitlab uns(ubscribe) <project-name> <identifier>      - Unsubscribe a Gitlab user from receiving pull requests to a certain project from Hubot.
 #   hubot github subscribers <project-name>?                    - List all users subscribed to pull requests via Hubot for a certain Github project.
+#   hubot github sbs <project-name>?                            - List all users subscribed to pull requests via Hubot for a certain Github project.
+#   hubot gitlab me <identifier>?                               - Identifies the calling Hubot user with a given Gitlab user name or returns the current state
+#   hubot gitlab s(ubscribe) <project-name> <identifier>        - Subscribe a Gitlab user to receive pull requests to a certain project from Hubot.
+#   hubot gitlab uns(ubscribe) <project-name> <identifier>      - Unsubscribe a Gitlab user from receiving pull requests to a certain project from Hubot.
 #   hubot gitlab subscribers <project-name>?                    - List all users subscribed to pull requests via Hubot for a certain Gitlab project.
+#   hubot gitlab sbs <project-name>?                            - List all users subscribed to pull requests via Hubot for a certain Gitlab project.
 #
 
 path       = require 'path'
@@ -22,7 +24,7 @@ module.exports = (robot) ->
   identifyRegExp = /(github|gitlab)\s(me)(\s[^\s]+)?/
   subscribeRegExp = /(github|gitlab)\s(s(ubscribe)?)(\s[^\s]+){2}/
   unsubscribeRegExp = /(github|gitlab)\s(uns(ubscribe)?)(\s[^\s]+){2}/
-  listRegExp = /(github|gitlab)\s(subscribers)(\s[^\s]+){0,2}/
+  listRegExp = /(github|gitlab)\s(subscribers|sbs)(\s[^\s]+){0,2}/
 
   # Parse service, project and user from command
   splitCommand = (msg, regExp) ->

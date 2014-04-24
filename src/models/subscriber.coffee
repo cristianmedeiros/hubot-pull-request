@@ -55,8 +55,8 @@ module.exports = class Subscriber
     else
       "User #{@user} was not subscribed to project #{@project}."
 
-  # Retrieves an array of usernames, subscribed to the given service & project.
-  # If currentServiceUser is provided, than removes it from the result.
+  # Retrieves an array of usernames that subscribed to the given service & project.
+  # If currentServiceUser is provided, it removes it from the result.
   @findNamesFor: (robot, service, project, currentServiceUser) ->
     subscribers = robot.brain.data.subscribers
     if !! subscribers[service] && !! subscribers[service][project] && subscribers[service][project].length > 0
