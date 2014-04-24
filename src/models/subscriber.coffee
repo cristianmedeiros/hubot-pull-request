@@ -19,7 +19,7 @@ module.exports = class Subscriber
     @subscribers[@service][@project] ||= []
 
   subscribed: ->
-    !! @subscribers[@service] && !! @subscribers[@service][@project] && !! _.indexOf(@subscribers[@service][@project], @user) >= 0
+    !! @subscribers[@service] && !! @subscribers[@service][@project] && _.contains(@subscribers[@service][@project], @user)
 
   save: (callback) ->
     async.waterfall [
@@ -34,15 +34,12 @@ module.exports = class Subscriber
           asyncCallback null, collaborators
 
       (collaborators, asyncCallback) =>
-        # users = collaborators.map (c) -> new User(c)
-        # userNames = users.map (u) -> u.username
-
         userNames = collaborators.map (c) -> c.username
 
-        if !! userNames[@user]
-          return asyncCallback(new Error("User #{@user} is not a valid collaborator for #{@service} project #{@project}!"), null)
+        if ! _.contains(userNames, @user)
+          asyncCallback(new Error("User #{@user} is not a valid collaborator for #{@service} project #{@project}!"), null)
         else if @subscribed()
-          return asyncCallback(new Error("User #{@user} is already subscribed to project #{@project}."), null)
+          asyncCallback(new Error("User #{@user} is already subscribed to project #{@project}."), null)
         else
           @initBrain()
           @subscribers[@service][@project].push(@user)
@@ -59,9 +56,10 @@ module.exports = class Subscriber
       "User #{@user} was not subscribed to project #{@project}."
 
   # Retrieves an array of usernames, subscribed to the given service & project.
-  @findNamesFor: (robot, service, project) ->
+  # If currentServiceUser is provided, than removes it from the result.
+  @findNamesFor: (robot, service, project, currentServiceUser) ->
     subscribers = robot.brain.data.subscribers
     if !! subscribers[service] && !! subscribers[service][project] && subscribers[service][project].length > 0
-      subscribers[service][project]
+      _.pull(subscribers[service][project], currentServiceUser)
     else
       null

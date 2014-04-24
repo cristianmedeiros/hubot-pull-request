@@ -2,9 +2,8 @@ path    = require 'path'
 _s      = require 'underscore.string'
 helpers = require path.resolve(__dirname, '..', 'helpers')
 
-# @deprecated: moved to routes, to simplify assignment of subscribers
 module.exports =
-  render: (msg, endpoint, projectName, mergeRequestId) ->
+  render: (msg, endpoint, projectName, mergeRequestId, userNames) ->
     requestType = if endpoint.name == 'github'
       'pull request'
     else
@@ -17,3 +16,4 @@ module.exports =
         msg.reply "An error occurred:\n#{err}"
       else
         msg.send "Successfully assigned the merge request '#{mergeRequest.title}' to #{mergeRequest.displayAssignee}."
+    , userNames

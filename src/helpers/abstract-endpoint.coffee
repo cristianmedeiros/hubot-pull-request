@@ -96,18 +96,12 @@ module.exports =
           return asyncCallback(err, null) if err
           
           # If there is a users pool, choose a valid user from there
-          console.log userNames
           if !! userNames
             collaboratorNames = collaborators.map((c) -> c.username)
-            console.log collaboratorNames
             candidateNames    = _.intersection(userNames, collaboratorNames)
-            console.log candidateNames
             if candidateNames.length > 0
-              winnerName = _.sample(candidateNames)
-              console.log winnerName
-
-              collaborator = _.first(collaborators, (c) -> c.username == winnerName || c.login == winnerName)
-            console.log collaborator
+              winnerName   = _.sample(candidateNames)
+              collaborator = _.find(collaborators, (c) -> c.username == winnerName)
           
           # Otherwise, fall back to all collaborators
           collaborator ||= _.sample(collaborators)

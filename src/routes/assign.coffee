@@ -16,6 +16,7 @@
 
 path       = require 'path'
 _s         = require 'underscore.string'
+view       = require path.resolve(__dirname, '..', 'views', 'assign')
 helpers    = require path.resolve(__dirname, '..', 'helpers')
 Subscriber = require path.resolve(__dirname, '..', 'models', 'subscriber')
 
@@ -33,16 +34,9 @@ module.exports = (robot) ->
     else
       helpers.gitlabEndpoint
 
-    # view.render msg, endpoint, projectName, mergeRequestId
+    # Retrieve the subscribed user pool for the current endpoint & project (if any)
+    serviceName = endpoint.name
+    currentServiceUser = msg.message.user[serviceName]
+    userNames = Subscriber.findNamesFor(robot, serviceName, projectName, currentServiceUser)
 
-    requestType = if endpoint.name == 'github' then 'pull request' else 'merge request'
-    msg.reply "Assigning #{requestType} ##{mergeRequestId} of #{projectName} ..."
-
-    userNames = Subscriber.findNamesFor(robot, endpoint.name, projectName)
-
-    endpoint.assignMergeRequest projectName, mergeRequestId, (err, mergeRequest) ->
-      if err
-        msg.reply "An error occurred:\n#{err}"
-      else
-        msg.send "Successfully assigned the merge request '#{mergeRequest.title}' to #{mergeRequest.displayAssignee}."
-    , userNames
+    view.render msg, endpoint, projectName, mergeRequestId, userNames
