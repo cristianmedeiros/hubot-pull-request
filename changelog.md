@@ -1,5 +1,26 @@
 # Changelog
 
+## v0.4.0
+- Added possibility to subscribe some users to a particular Github / Gitlab project. If a Github / Gitlab project has subscribers on Hubot, then pull / merge request assignments will only go to these subscribers. If no subscribers were found for a given project, Hubot will choose from all project collaborators.
+  - Triggers:
+    - `hubot github|gitlab subscribe <project> <user>`
+    - `hubot github|gitlab s <project> <user>`
+- Added possibility to unsubscribe a user from a particula Github / Gitlab project:
+  - Triggers:
+    - `hubot github|gitlab unsubscribe <project> <user>`
+    - `hubot github|gitlab uns <project> <user>`
+- Added possibility to list all subscribers:
+  - Triggers:
+    - `hubot github|gitlab subscribers`
+    - `hubot github|gitlab sbs`
+- Added possibility to store a Hubot user's Github / Gitlab user name. If a Hubot user has a Github / Gitlab user name registered with Hubot, then random pull / merge request assignments will exclude the caller.
+  - Triggers:
+    - `hubot github|gitlab me <user>`
+- Added possibility to display the Github / Gitlab registered user for the calling Hubot user:
+  - Triggers:
+    - `hubot github|gitlab me`
+- Subscribers can be persisted to the file system, if you enable the `file-brain.coffee` script in your `hubot-scripts.json` file.
+
 ## v0.3.0
 - Added possibility to assign a pull request to a random user.
   - Triggers:
