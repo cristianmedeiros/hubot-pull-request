@@ -11,6 +11,7 @@ module.exports = class Subscriber
     @user        = data.user
     @userId      = null
     @endpoint    = if @service == "gitlab" then helpers.gitlabEndpoint else helpers.githubEndpoint
+    @robot.brain.data["subscribers"] = {} unless @robot.brain.data["subscribers"]
     @subscribers = @robot.brain.data.subscribers
 
   initBrain: ->
