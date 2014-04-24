@@ -1,9 +1,9 @@
-_         = require 'lodash'
-_s        = require 'underscore.string'
-path      = require 'path'
-async     = require 'async'
-Project   = require path.resolve __dirname, '..', 'models', 'project'
-getConfig = require path.resolve __dirname, '..', 'helpers', 'get-config'
+_           = require 'lodash'
+_s          = require 'underscore.string'
+path        = require 'path'
+async       = require 'async'
+Project     = require path.resolve __dirname, '..', 'models', 'project'
+getConfig   = require path.resolve __dirname, '..', 'helpers', 'get-config'
 
 module.exports =
   name: 'abstract'
@@ -77,8 +77,10 @@ module.exports =
   # - projectName: A needle that will be used for searching the relevant projects.
   # - mergeRequestId: An ID of a merge request.
   # - callback: A function that gets called, once the result is in place.
+  # - userNames: An array of usernames to choose from - set this to null / disgard for the default behaviour (all users).
   #
-  assignMergeRequest: (projectName, mergeRequestId, callback) ->
+  assignMergeRequest: (projectName, mergeRequestId, callback, userNames) ->
+    serviceName = @name
     async.waterfall [
       (asyncCallback) =>
         @_searchProject projectName, asyncCallback
@@ -92,7 +94,18 @@ module.exports =
       (project, mergeRequest, asyncCallback) =>
         @_readCollaborators project, (err, collaborators) ->
           return asyncCallback(err, null) if err
-          collaborator = _.sample(collaborators)
+          
+          # If there is a users pool, choose a valid user from there
+          if !! userNames
+            collaboratorNames = collaborators.map((c) -> c.username)
+            candidateNames    = _.intersection(userNames, collaboratorNames)
+            if candidateNames.length > 0
+              winnerName   = _.sample(candidateNames)
+              collaborator = _.find(collaborators, (c) -> c.username == winnerName)
+          
+          # Otherwise, fall back to all collaborators
+          collaborator ||= _.sample(collaborators)
+
           asyncCallback null, project, mergeRequest, collaborator
 
       (project, mergeRequest, member, asyncCallback) =>
