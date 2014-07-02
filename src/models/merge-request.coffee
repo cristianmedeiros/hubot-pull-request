@@ -18,6 +18,9 @@ module.exports = class MergeRequest
   @property 'displayState', get: -> @state
   @property 'title', get: -> @data.title
   @property 'displayAssignee', get: -> @data.assignee.username || @data.assignee.login
+  @property 'url', get: -> @data.html_url
   @property 'condensed', get: ->
     assignee = if @data.assignee then @displayAssignee else 'unassigned'
-    "#{@publicId} » #{@displayState} » #{assignee} » #{@title}"
+    url      = if @url then " » #{@data.html_url}" else ""
+
+    "#{@publicId} » #{@displayState} » #{assignee} » #{@title}#{url}"
