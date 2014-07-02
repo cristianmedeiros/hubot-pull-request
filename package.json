@@ -1,6 +1,6 @@
 {
   "name": "hubot-pull-request",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "A hubot script that handles merge requests (Gitlab) and pull requests (Github).",
   "main": "index.coffee",
   "scripts": {
