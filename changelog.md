@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.4.2
+- Try/catch errors
+- Add urls to pr listings
+
 ## v0.4.1
 - Small fixes:
   - Initializing `subscribers` in Hubot brain, so we don't have to do it manually.
