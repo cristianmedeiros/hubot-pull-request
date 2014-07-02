@@ -29,9 +29,8 @@ module.exports =
 
           Object.keys(groups).forEach (projectName) ->
             answer += "\n\n#{projectName}"
-            answer += "\n#{[1..projectName.length].map(-> '-').join('')}"
 
             _.sortBy(groups[projectName], 'publicId').forEach (request) ->
               answer += "\n#{request.condensed}"
 
-          msg.send "/quote #{answer.trim()}"
+          msg.send "#{answer.trim()}"

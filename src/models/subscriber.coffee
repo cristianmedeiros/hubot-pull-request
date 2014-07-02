@@ -59,8 +59,12 @@ module.exports = class Subscriber
   # Retrieves an array of usernames that subscribed to the given service & project.
   # If currentServiceUser is provided, it removes it from the result.
   @findNamesFor: (robot, service, project, currentServiceUser) ->
-    subscribers = _.cloneDeep(robot.brain.data.subscribers)
-    if !! subscribers[service] && !! subscribers[service][project] && subscribers[service][project].length > 0
-      _.pull(subscribers[service][project], currentServiceUser)
-    else
+    try
+      subscribers = _.cloneDeep(robot.brain.data.subscribers)
+
+      if subscribers[service][project].length > 0
+        _.pull(subscribers[service][project], currentServiceUser)
+      else
+        null
+    catch e
       null

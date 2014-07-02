@@ -60,14 +60,14 @@ describe 'views', ->
           describe "without a specific scope", ->
             it 'returns only the open merge requests', ->
               @scope   = null
-              @content = '/quote company/project1\n----------------\n11 » merged » unassigned » urgent thing\n12 » opened » unassigned » this merge request makes things better'
+              @content = 'company/project1\n11 » merged » unassigned » urgent thing\n12 » opened » unassigned » this merge request makes things better'
 
           describe "with 'merged' scope", ->
             it 'returns only the merged merge requests', ->
               @scope   = 'merged'
-              @content = '/quote company/project1\n----------------\n11 » merged » unassigned » urgent thing'
+              @content = 'company/project1\n11 » merged » unassigned » urgent thing'
 
           describe "with '*' scope", ->
             it 'returns all merge requests', ->
               @scope   = '*'
-              @content = '/quote company/project1\n----------------\n11 » merged » unassigned » urgent thing\n12 » opened » unassigned » this merge request makes things better'
+              @content = 'company/project1\n11 » merged » unassigned » urgent thing\n12 » opened » unassigned » this merge request makes things better'
