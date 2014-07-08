@@ -14,11 +14,12 @@
 #   *:      All merge requests
 #
 
-path       = require 'path'
-_s         = require 'underscore.string'
-view       = require path.resolve(__dirname, '..', 'views', 'assign')
-helpers    = require path.resolve(__dirname, '..', 'helpers')
-Subscriber = require path.resolve(__dirname, '..', 'models', 'subscriber')
+path             = require 'path'
+_s               = require 'underscore.string'
+view             = require path.resolve(__dirname, '..', 'views', 'assign')
+helpers          = require path.resolve(__dirname, '..', 'helpers')
+Subscriber       = require path.resolve(__dirname, '..', 'models', 'subscriber')
+findUsersHelpers = require path.resolve(__dirname, '..', 'helpers', 'find-online-github-users')
 
 module.exports = (robot) ->
   routeRegExp = /((m(erge-)?r(equest)?)|(p(ull-)?r(equest)?))\sa(ssign)?/
@@ -34,9 +35,5 @@ module.exports = (robot) ->
     else
       helpers.gitlabEndpoint
 
-    # Retrieve the subscribed user pool for the current endpoint & project (if any)
-    serviceName = endpoint.name
-    currentServiceUser = msg.message.user[serviceName]
-    userNames = Subscriber.findNamesFor(robot, serviceName, projectName, currentServiceUser)
-
-    view.render msg, endpoint, projectName, mergeRequestId, userNames
+    findUsersHelpers.getActiveUsersWithGithubAccount robot, msg, (userNames) ->
+      view.render msg, endpoint, projectName, mergeRequestId, userNames
