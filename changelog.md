@@ -1,7 +1,7 @@
 # Changelog
 
 ## v0.5.0
-- `bender pr a` takes now only people into account which are online. 
+- `hubot pull-request assign` takes only people into account which are online.
 
 ## v0.4.2
 - Try/catch errors
