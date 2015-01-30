@@ -26,8 +26,6 @@ module.exports = (robot) ->
     scope          = msg.envelope.message.text.replace(botNameRemoval, "").replace(routeRegExp, "").trim()
     endpoint       = if !!msg.envelope.message.text.match(/(pull-request|pr)\s/)
       helpers.githubEndpoint
-    else
-      helpers.gitlabEndpoint
 
     if scope == '*'
       scope = ''

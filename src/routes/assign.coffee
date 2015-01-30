@@ -32,8 +32,6 @@ module.exports = (robot) ->
     mergeRequestId = match[2]
     endpoint       = if !!msg.envelope.message.text.match(/(pull-request|pr)\s/)
       helpers.githubEndpoint
-    else
-      helpers.gitlabEndpoint
 
     findUsersHelpers.getActiveUsersWithGithubAccount robot, msg, (userNames) ->
       view.render msg, endpoint, projectName, mergeRequestId, userNames
